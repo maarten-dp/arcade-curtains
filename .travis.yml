@@ -1,0 +1,40 @@
+language: python
+python:
+- 3.6
+install:
+- pip install -U pip wheel
+- pip install -U -r requirements-dev.txt
+- pip install .
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+stages:
+- test
+- linter
+- name: deploy
+  if: tag IS present
+jobs:
+  include:
+  - stage: test
+    name: Tests
+    script: pytest --cov-report=term-missing --cov=arcade-curtains
+    after_success:
+    - codecov
+  - stage: linter
+    name: Linter
+    script: pre-commit run --all-files --show-diff-on-failure
+  - stage: deploy
+    name: PyPI Deploy
+    script: skip
+    install: skip
+    before_install: skip
+    deploy:
+      skip_cleanup: true
+      provider: pypi
+      distributions: sdist bdist_wheel
+      user: maartendp
+      on:
+        tags: true
+        repo: maarten-dp/arcade-curtains
+      password:
+        secure: KnWYWO1a3bd718i0PzuFPCcf/S3V2DyDNRW4VuAcrRXDEVdRF93w9HC7EdD3nseh5PX8YWqLKGiVRy7xjnEVR6sf1p9QBJkHNyKywDgnLAhL0nJj7RoB/qVb2zXyyqNnD+jA/Uv51y9UZLBHgG0bi2UwZ30jQ3f37xTeBscxcfMxThESxfZli9e4EWwt2sHW08hKCNjq77HvhtJoJVWjLFsGtvY72bk5sesSvWJ5eNyXJS2y3GgcopOvLBKbl0+IRm6scaxNaXDQSRvc+TQtwY5/cL8EbCDw9PifORfpqM0ONGhaXijUoERw2Jnd6s/euK+MOz37qAw+fZspqKvA+u+njgH8T8EtZCS3MV0fg/m2VdhXpgDkCV4/msSsNyCfr0qxA5LKLsYNDrnhDNYo4SciIqvPlzP8QujkdT2Q6H+pNim6h1FG9S/8Hw7norxZ8OKmKCt/aw9r9DybOIjoQUiKMw0hYyEN09piFDg2DMxb/XTU1smzpPM776nZPA03EEqktpKivyPLsmklxBl+ALiJH+UwWXkS6HKMMfhQk81Nw7EfcdcaioMRBtMYeb/kQmio6rqDXHipvYFyAq44nuIW6/nfmcfoJ/GWiCooErM92b63hn3lix6XDd2plng0tuBvRPFu8PALW4H0yq2lfC86rMGKqHD/xdlgoC7wkX0=
