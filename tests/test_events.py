@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-import arcade
 import pytest
+from arcade.key import ESCAPE
 
 from arcade_curtains.event import EventHandler
 
@@ -37,6 +37,6 @@ def test_it_can_fire_events(sprite, event, triggers):
 
 def test_it_can_fire_keyboard_events(sprite):
     ev = EventHandler()
-    ev.key(arcade.key.ESCAPE, sprite.handler)
-    ev.trigger_key_press(arcade.key.ESCAPE)
+    ev.key(ESCAPE, sprite.handler)
+    ev.trigger_key_press(ESCAPE)
     sprite.handler.assert_called_once()
