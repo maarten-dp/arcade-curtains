@@ -11,5 +11,6 @@ def sprite():
 
 @pytest.fixture(scope='session', autouse=True)
 def create_directories(request):
-    with patch('arcade.application.pyglet'):
-        yield
+    with patch('arcade.application.pyglet.gl'):
+        with patch('arcade.application.pyglet'):
+            yield
