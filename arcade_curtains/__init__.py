@@ -77,5 +77,5 @@ class Curtains:
         self.current_scene.events.trigger_drag(x, y, dx, dy)
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            self.current_scene.events.trigger_escape()
+        if not modifiers:
+            self.current_scene.events.trigger_key_press(key)

@@ -92,8 +92,8 @@ class EventHandler(object):
     def trigger_after_draw(self):
         run_handlers(self.handlers[Event.AFTER_DRAW])
 
-    def trigger_escape(self):
-        run_handlers(self.handlers[Event.ESCAPE])
+    def trigger_key_press(self, key):
+        run_handlers(self.handlers.get(key, []))
 
     def get_sprite_at(self, *coords):
         sprites = arcade.SpriteList()
@@ -157,4 +157,5 @@ class EventHandler(object):
     remove_before_draw = partialmethod(remove_event, Event.BEFORE_DRAW)
     remove_after_draw = partialmethod(remove_event, Event.AFTER_DRAW)
 
-    escape = partialmethod(add_event, Event.ESCAPE)
+    key = add_event
+    remove_key = remove_event
