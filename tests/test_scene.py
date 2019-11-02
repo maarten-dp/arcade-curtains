@@ -10,7 +10,7 @@ class Scene(BaseScene):
         pass
 
 
-def test_it_triggers_the_right_scene_event(sprit&e):
+def test_it_triggers_the_right_scene_event(sprite):
     window = Mock()
     curtains = Curtains(window)
     scene1 = Scene(window)
