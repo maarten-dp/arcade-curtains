@@ -1,6 +1,9 @@
+import sys
 from unittest.mock import Mock, patch
 
 import pytest
+
+sys.modules['pyglet.gl'] = Mock()
 
 
 @pytest.fixture(scope='function')
