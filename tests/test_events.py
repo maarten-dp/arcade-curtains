@@ -2,8 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 
-from arcade_curtains.event import EventHandler
-
 ESCAPE = 65307
 
 
@@ -16,6 +14,7 @@ ESCAPE = 65307
     ('drag', [('trigger_down', (50, 50)), ('trigger_drag', (50, 50, 1, 1))]),
 ])
 def test_it_can_fire_sprite_events(sprite, event, triggers):
+    from arcade_curtains.event import EventHandler
     ev = EventHandler()
     getattr(ev, event)(sprite, sprite.handler)
     for trigger, coords in triggers:
@@ -29,6 +28,7 @@ def test_it_can_fire_sprite_events(sprite, event, triggers):
     ('after_draw', [('trigger_after_draw', ())]),
 ])
 def test_it_can_fire_events(sprite, event, triggers):
+    from arcade_curtains.event import EventHandler
     ev = EventHandler()
     getattr(ev, event)(sprite.handler)
     for trigger, args in triggers:
@@ -37,6 +37,7 @@ def test_it_can_fire_events(sprite, event, triggers):
 
 
 def test_it_can_fire_keyboard_events(sprite):
+    from arcade_curtains.event import EventHandler
     ev = EventHandler()
     ev.key(ESCAPE, sprite.handler)
     ev.trigger_key_press(ESCAPE)
