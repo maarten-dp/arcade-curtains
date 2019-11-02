@@ -1,10 +1,9 @@
 from unittest.mock import Mock
 
 import pytest
+from arcade.key import ESCAPE
 
 from arcade_curtains.event import EventHandler
-
-ESCAPE = 65307
 
 
 @pytest.mark.parametrize("event,triggers", [

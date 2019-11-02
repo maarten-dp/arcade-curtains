@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+# Hard mocking pyglet.gl to account for the travis CI machines not having GLU
 sys.modules['pyglet.gl'] = Mock()
 
 
@@ -10,9 +11,3 @@ sys.modules['pyglet.gl'] = Mock()
 def sprite():
     points = ((0, 0), (0, 100), (100, 0), (100, 100))
     return Mock(points=points)
-
-
-@pytest.fixture(scope='session', autouse=True)
-def create_directories(request):
-    with patch('arcade.application'):
-        yield
