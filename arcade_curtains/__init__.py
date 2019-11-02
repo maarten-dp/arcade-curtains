@@ -6,7 +6,7 @@ from pyglet import clock
 from .scene import BaseScene  # noqa
 
 
-def bind(member, fn, window_fn):
+def bind(fn, window_fn):
     @wraps(window_fn)
     def decorator(*args, **kwargs):
         fn(*args, **kwargs)
@@ -49,7 +49,7 @@ class Curtains:
         }
         for member, fn in members.items():
             window_fn = getattr(window, member)
-            setattr(window, member, bind(member, fn, window_fn))
+            setattr(window, member, bind(fn, window_fn))
         clock.schedule(window.update)
 
     def on_draw(self):

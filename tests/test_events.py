@@ -6,12 +6,6 @@ import pytest
 from arcade_curtains.event import EventHandler
 
 
-@pytest.fixture(scope='function')
-def sprite():
-    points = ((0, 0), (0, 100), (100, 0), (100, 100))
-    return Mock(points=points)
-
-
 @pytest.mark.parametrize("event,triggers", [
     ('down', [('trigger_down', (50, 50))]),
     ('up', [('trigger_up', (50, 50))]),
