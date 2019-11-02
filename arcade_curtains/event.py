@@ -1,10 +1,9 @@
-import weakref
-import arcade
-from unittest.mock import Mock
-import time
-from enum import Enum
 from collections import defaultdict
+from enum import Enum
 from functools import partialmethod
+from unittest.mock import Mock
+
+import arcade
 
 
 class SpriteEvent(Enum):
@@ -23,8 +22,8 @@ class Event(Enum):
     ESCAPE = 10
 
 
-EMPTY = Mock()
 EMPTY_SPRITE = Mock()
+
 
 def run_handlers(handlers, *args, **kwargs):
     for handler in handlers:
@@ -157,6 +156,5 @@ class EventHandler(object):
     remove_frame = partialmethod(remove_event, Event.FRAME)
     remove_before_draw = partialmethod(remove_event, Event.BEFORE_DRAW)
     remove_after_draw = partialmethod(remove_event, Event.AFTER_DRAW)
-
 
     escape = partialmethod(add_event, Event.ESCAPE)

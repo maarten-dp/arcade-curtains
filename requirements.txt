@@ -1,2 +1,2 @@
-pbr>=3.0
 arcade
+pbr>=3.0

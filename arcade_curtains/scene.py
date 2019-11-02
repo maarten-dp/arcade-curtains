@@ -1,4 +1,5 @@
 import arcade
+
 from .event import EventHandler
 
 

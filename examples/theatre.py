@@ -1,10 +1,11 @@
 import arcade
-from arcade_curtains import Curtains
-from arcade_curtains.scene import BaseScene
 from scipy.interpolate import interp1d
 
-SCREEN_WIDTH = 1500
-SCREEN_HEIGHT = 975
+from arcade_curtains import Curtains
+from arcade_curtains.scene import BaseScene
+
+SCREEN_WIDTH = 620
+SCREEN_HEIGHT = 260
 SCREEN_TITLE = "Play"
 PADDING = 20
 
@@ -22,15 +23,12 @@ class BasicSprite(arcade.Sprite):
         self.size = kwargs.pop('size', 100)
 
         super().__init__(*args, **kwargs)
-        self._texture = self.get_texture(self.size, color)
+        self.texture = self.get_texture(self.size, color)
         self.textures = [
-            self._texture,
+            self.texture,
             self.get_texture(self.size, GREEN),
             self.get_texture(self.size, RED),
         ]
-        self._width = self._texture.width * self.scale
-        self._height = self._texture.height * self.scale
-        self._texture.scale = self.scale
 
     def get_texture(self, size, color):
         raise NotImplementedError()
@@ -49,7 +47,7 @@ class CircleSprite(BasicSprite):
         self.set_texture(1)
 
     def black(self, *args):
-        self.set_texture(0)  
+        self.set_texture(0)
 
 
 class MoveAnimator:
@@ -63,7 +61,7 @@ class MoveAnimator:
         y_points = [sprite.center_y, y]
         self.x_path = interp1d([0, self.speed], x_points)
         self.y_path = interp1d([0, self.speed], y_points)
-        
+
         self.events.frame(self.move)
 
     def move(self, delta):
@@ -89,24 +87,28 @@ class CharacterDevelopment(BaseScene):
         self.actors = arcade.SpriteList()
 
         # set up buttons
-        btn_add_actor = SquareSprite(center_x=60, center_y=60, color=self.secondary_color)
-        btn_next_scene = SquareSprite(center_x=180, center_y=60, color=self.secondary_color)
+        btn_add_actor = SquareSprite(
+            center_x=60, center_y=60, color=self.secondary_color)
+        btn_next_scene = SquareSprite(
+            center_x=180, center_y=60, color=self.secondary_color)
         self.buttons.append(btn_add_actor)
         self.buttons.append(btn_next_scene)
 
         # set up button events
-        self.events.click(btn_next_scene, lambda *x: self.curtains.set_scene(self.next_scene))
+        self.events.click(btn_next_scene,
+                          lambda *x: self.curtains.set_scene(self.next_scene))
         self.events.click(btn_add_actor, self.add_actor)
 
         self.add_label(btn_add_actor, "Add\nActor", self.primary_color)
         self.add_label(btn_next_scene, "Next\nScene", self.primary_color)
 
-
     def add_label(self, attach_to, text, color):
         x = attach_to.center_x - (attach_to.width / 2) + 10
         y = attach_to.center_y
+
         def draw_label(*args, **kwargs):
             arcade.draw_text(text, x, y, color, 14)
+
         self.events.after_draw(draw_label)
 
     def enter_scene(self):
@@ -115,7 +117,7 @@ class CharacterDevelopment(BaseScene):
     def add_actor(self, sprite, x, y):
         actor = CircleSprite(color=self.secondary_color)
         x = SCREEN_WIDTH / 2
-        y = SCREEN_HEIGHT - actor.height - PADDING
+        y = SCREEN_HEIGHT - (actor.height / 2) - PADDING
         if len(self.actors):
             neighbour = self.actors.sprite_list[-1]
             x = neighbour.center_x + actor.width + PADDING
@@ -137,12 +139,8 @@ class CharacterDevelopment(BaseScene):
         # Ass some nice animations
         offset = (actor.width + PADDING) / 2
         for actor in self.actors:
-            animator = MoveAnimator(
-                actor,
-                actor.center_x - offset,
-                actor.center_y,
-                self.events
-            )
+            MoveAnimator(actor, actor.center_x - offset, actor.center_y,
+                         self.events)
 
 
 class PlotTwist(CharacterDevelopment):
@@ -153,11 +151,15 @@ class PlotTwist(CharacterDevelopment):
 
     def setup(self):
         super().setup()
-        btn_previous_scene = SquareSprite(center_x=300, center_y=60, color=self.secondary_color)
-        self.events.click(btn_previous_scene, lambda *x: self.curtains.set_scene(self.previous_scene))
+        btn_previous_scene = SquareSprite(
+            center_x=300, center_y=60, color=self.secondary_color)
+        self.events.click(
+            btn_previous_scene,
+            lambda *x: self.curtains.set_scene(self.previous_scene))
         self.buttons.append(btn_previous_scene)
 
-        self.add_label(btn_previous_scene, "Previous\nScene", self.primary_color)
+        self.add_label(btn_previous_scene, "Previous\nScene",
+                       self.primary_color)
 
 
 class DeusExMachina(BaseScene):
@@ -165,8 +167,10 @@ class DeusExMachina(BaseScene):
         self.buttons = arcade.SpriteList()
         btn_scene1 = SquareSprite(center_x=60, center_y=60)
         btn_scene2 = SquareSprite(center_x=180, center_y=60)
-        self.events.click(btn_scene1, lambda *x: self.curtains.set_scene('scene1'))
-        self.events.click(btn_scene2, lambda *x: self.curtains.set_scene('scene2'))
+        self.events.click(btn_scene1,
+                          lambda *x: self.curtains.set_scene('scene1'))
+        self.events.click(btn_scene2,
+                          lambda *x: self.curtains.set_scene('scene2'))
         self.buttons.append(btn_scene1)
         self.buttons.append(btn_scene2)
 
@@ -174,7 +178,7 @@ class DeusExMachina(BaseScene):
         self.add_label(btn_scene2, "Go To\nScene2", WHITE)
 
     def enter_scene(self):
-        arcade.set_background_color(WHITE)
+        arcade.set_background_color(GREEN)
 
     add_label = CharacterDevelopment.add_label
 
@@ -199,5 +203,4 @@ if __name__ == "__main__":
     try:
         arcade.run()
     except KeyboardInterrupt:
-        from pprint import pprint
-        pprint(timeseries)
+        pass

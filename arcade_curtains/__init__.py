@@ -1,6 +1,9 @@
-import arcade
 from functools import wraps
+
+import arcade
 from pyglet import clock
+
+from .scene import BaseScene  # noqa
 
 
 def bind(member, fn, window_fn):
@@ -8,6 +11,7 @@ def bind(member, fn, window_fn):
     def decorator(*args, **kwargs):
         fn(*args, **kwargs)
         return window_fn(*args, **kwargs)
+
     return decorator
 
 

@@ -1,12 +1,12 @@
 -r requirements.txt
+codecov
+flake8
+isort
 
 
 pre-commit==1.15.2
-flake8
-yapf
-isort
 
 pytest >= 4.5.0
 pytest-cov
 pytest-xdist
-codecov
+yapf
