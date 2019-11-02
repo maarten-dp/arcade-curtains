@@ -9,7 +9,6 @@ def sprite():
     return Mock(points=points)
 
 
-
 @pytest.fixture(scope='session', autouse=True)
 def create_directories(request):
     with patch('arcade.application.pyglet'):
