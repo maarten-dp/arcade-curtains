@@ -4,9 +4,9 @@
 
 ## Introduction
 
-### Events
+Arcade-curtains is a basic scene and event manager for [Arcade](https://github.com/pvcraven/arcade). The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
 
-Arcade-curtains is a basic scene and event manager for (Arcade)[https://github.com/pvcraven/arcade]. The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
+### Events
 
 There are two types of events.
 
