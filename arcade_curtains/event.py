@@ -127,7 +127,7 @@ class EventHandler(object):
 
     def kill(self, sprite):
         for event in SpriteEvent:
-            self.remove_sprite_event(event, sprite)
+            self.sprite_handlers[event].pop(sprite, None)
         for attribute_name in dir(sprite):
             attr = getattr(sprite, attribute_name)
             if callable(attr):

@@ -17,7 +17,7 @@ class BaseScene:
         self.curtains = curtains
 
     def setup(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def leave_scene(self):
         pass
