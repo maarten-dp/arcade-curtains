@@ -78,7 +78,7 @@ You are still able to overload these Arcade window methods as normal, but it is 
 
 ### Creating a Scene
 
-Scenes are the basis of this library, and when using it, every game needs at least one.
+Scenes are the basis of this library, and when using curtains, every game needs at least one.
 
 Once you've defined your Curtains instance, you can add a scene to it. But to be able to do this, you will have to subclass the `BaseScene` class provided by `arcade-curtains` and overload the setup method.
 In the setup method you can run all code that is making sprites, spritelists and linking your handlers.
@@ -150,8 +150,6 @@ class MyOpeningScene(BaseScene):
 
 Some events are not linkable to a sprite, but you would still like to define some handlers to it. For instance the `frame` event, which is triggered at every frame. You could treat it as a sprite event, but it wouldn't make sense as it doesn't get triggered due to sprite interaction. Instead, you can just attach a handler function, that interracts with the desired sprite, to the `frame` event.
 
-Alternatively you can add a handler that doesn't interract with
-
 
 ```python
 import arcade
@@ -170,6 +168,26 @@ class MyOpeningScene(BaseScene):
         self.actor = CustomSprite()
 
         self.events.frame(sprite.spin)
+```
+
+Alternatively you can add a handler that doesn't interract with a sprite in any way.
+
+```python
+import random
+
+import arcade
+from arcade_curtains import BaseScene
+
+COLORS = [getattr(arcade.color, color) for color in dir(arcade.color)]
+
+
+def trip_balls(delta):
+    arcade.set_background_color(random.choice(COLORS))
+
+
+class MyOpeningScene(BaseScene):
+    def setup(self):
+        self.events.frame(trip_balls)
 ```
 
 Adding keyboard events is equally easy, and uses the arcade keymap to define handlers
