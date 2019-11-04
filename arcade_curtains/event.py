@@ -19,7 +19,6 @@ class Event(Enum):
     FRAME = 7
     BEFORE_DRAW = 8
     AFTER_DRAW = 9
-    ESCAPE = 10
 
 
 EMPTY_SPRITE = Mock()

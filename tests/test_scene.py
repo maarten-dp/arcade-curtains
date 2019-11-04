@@ -13,8 +13,8 @@ class Scene(BaseScene):
 def test_it_triggers_the_right_scene_event(sprite):
     window = Mock()
     curtains = Curtains(window)
-    scene1 = Scene(window)
-    scene2 = Scene(window)
+    scene1 = Scene()
+    scene2 = Scene()
     curtains.add_scenes({
         'scene1': scene1,
         'scene2': scene2,

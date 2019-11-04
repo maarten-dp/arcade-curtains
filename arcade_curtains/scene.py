@@ -4,13 +4,17 @@ from .event import EventHandler
 
 
 class BaseScene:
-    def __init__(self, window):
-        self.window = window
-        self.curtains = window.curtains
+    def __init__(self):
+        self.window = None
+        self.curtains = None
         self.events = EventHandler()
         self._sprite_lists = []
         self.setup()
         self._setup_spritelists()
+
+    def _bind(self, window, curtains):
+        self.window = window
+        self.curtains = curtains
 
     def setup(self):
         raise NotImplementedError

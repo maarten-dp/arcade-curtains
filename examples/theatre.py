@@ -188,9 +188,9 @@ class Window(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         self.curtains = Curtains(self)
         self.curtains.add_scenes({
-            'scene1': CharacterDevelopment(self),
-            'scene2': PlotTwist(self),
-            'scene3': DeusExMachina(self)
+            'scene1': CharacterDevelopment(),
+            'scene2': PlotTwist(),
+            'scene3': DeusExMachina()
         })
 
     def setup(self):

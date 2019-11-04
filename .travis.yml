@@ -17,7 +17,7 @@ jobs:
   include:
   - stage: test
     name: Tests
-    script: pytest --cov-report=term-missing --cov=arcade-curtains
+    script: pytest --cov-report=term-missing --cov=arcade_curtains
     after_success:
     - codecov
   - stage: linter

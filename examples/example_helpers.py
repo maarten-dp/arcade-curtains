@@ -23,7 +23,7 @@ def get_window(name, Scene):
         def __init__(self):
             super().__init__(140, 140, name)
             self.curtains = Curtains(self)
-            self.curtains.add_scene('scene1', Scene(self))
+            self.curtains.add_scene('scene1', Scene())
 
         def setup(self):
             self.curtains.set_scene('scene1')

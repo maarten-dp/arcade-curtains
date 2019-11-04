@@ -9,8 +9,9 @@ from .scene import BaseScene  # noqa
 def bind(fn, window_fn):
     @wraps(window_fn)
     def decorator(*args, **kwargs):
+        res = window_fn(*args, **kwargs)
         fn(*args, **kwargs)
-        return window_fn(*args, **kwargs)
+        return res
 
     return decorator
 
@@ -18,13 +19,14 @@ def bind(fn, window_fn):
 class Curtains:
     def __init__(self, window=None):
         self.current_scene = None
-        self.window = window
+        self.window = None
         self.scenes = {}
         if window:
             self.bind(window)
 
     def add_scene(self, name, scene):
         self.scenes[name] = scene
+        scene._bind(self.window, self)
 
     def add_scenes(self, scenes):
         for name, scene in scenes.items():
@@ -36,7 +38,15 @@ class Curtains:
         self.current_scene = self.scenes[name]
         self.current_scene.enter_scene()
 
-    def bind(self, window):
+    def bind(self, window=None):
+        if window:
+            self.window = window
+            for scene in self.scenes.values():
+                scene._bind(self.window, self)
+        if not self.window:
+            msg = "Curtains instance is not yet bound to an Arcade window"
+            raise Exception(msg)
+
         clock.unschedule(window.update)
         members = {
             'update': self.update,
