@@ -172,6 +172,26 @@ class MyOpeningScene(BaseScene):
         self.events.frame(sprite.spin)
 ```
 
+Adding keyboard events is equally easy, and uses the arcade keymap to define handlers
+
+```python
+import sys
+
+import arcade
+
+from arcade_curtains import BaseScene
+
+
+def exit(key):
+    sys.exit(0)
+
+
+class MyOpeningScene(BaseScene):
+    def setup(self):
+        self.events.key(arcade.key.ESCAPE, exit)
+```
+
+
 ## Planned features
 
 A planned addition to this library is an animation manager that is able to animate until a condition is met. (An example of how that would work can be found in `examples/theatre.py::MoveAnimator`).
