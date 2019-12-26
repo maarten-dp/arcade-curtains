@@ -3,6 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/arcade-curtains.svg)](https://pypi.org/project/arcade-curtains/)
 
 ![A simple animation maker](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/animation_maker.gif)
+
 A simple animation maker app written in under 300 lines using Arcade and Arcade-Curtains. This makes use of the soon to be released animation manager.
 
 ## Introduction
