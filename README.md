@@ -2,6 +2,9 @@
 [![Codecov](https://codecov.io/gh/maarten-dp/arcade-curtains/branch/master/graph/badge.svg)](https://codecov.io/gh/maarten-dp/arcade-curtains)
 [![PyPI version](https://badge.fury.io/py/arcade-curtains.svg)](https://pypi.org/project/arcade-curtains/)
 
+![A simple animation maker](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/animation_maker.gif)
+A simple animation maker app written in under 300 lines using Arcade and Arcade-Curtains. This makes use of the soon to be released animation manager.
+
 ## Introduction
 
 Arcade-curtains is a basic scene and event manager for [Arcade](https://github.com/pvcraven/arcade). The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
