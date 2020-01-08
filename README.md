@@ -4,7 +4,7 @@
 
 ![A simple animation maker](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/animation_maker.gif)
 
-A simple animation maker app written in 300 lines using Arcade and Arcade-Curtains. This makes use of the soon to be released animation manager.
+A simple animation maker app written in 170 (300-ish if you include the code to enable the UI Button elements) lines using Arcade and Arcade-Curtains. This makes use of the soon to be released animation manager.
 
 ## Introduction
 
