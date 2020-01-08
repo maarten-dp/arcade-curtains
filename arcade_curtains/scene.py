@@ -1,13 +1,16 @@
 import arcade
 
 from .event import EventHandler
+from .animation import AnimationManager
 
 
 class BaseScene:
     def __init__(self):
         self.window = None
         self.curtains = None
+        self.animations = AnimationManager()
         self.events = EventHandler()
+        self.events.frame(self.animations._blip)
         self._sprite_lists = []
         self.setup()
         self._setup_spritelists()
@@ -19,10 +22,10 @@ class BaseScene:
     def setup(self):
         raise NotImplementedError()
 
-    def leave_scene(self):
+    def leave_scene(self, next_scene):
         pass
 
-    def enter_scene(self):
+    def enter_scene(self, previous_scene):
         pass
 
     def _setup_spritelists(self):

@@ -4,14 +4,15 @@
 
 ![A simple animation maker](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/animation_maker.gif)
 
-A simple animation maker app written in 170 (300-ish if you include the code to enable the UI Button elements) lines using Arcade and Arcade-Curtains. This makes use of the soon to be released animation manager.
+A simple animation maker app written in 170 lines (300-ish if you include the code to enable the UI Button elements) using Arcade and Arcade-Curtains. [Have a look at the code!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/animation_maker.py)
 
 ## Introduction
 
 Arcade-curtains is a basic scene and event manager for [Arcade](https://github.com/pvcraven/arcade). The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
 
 ![Showcasing scenes](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/theatre.gif)
-A gif showcasing scenes. [Run it yourself!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/theatre.py)
+
+A gif showcasing scenes. [Have a look at the code!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/theatre.py)
 
 
 ### Events
@@ -39,6 +40,10 @@ You can attach your event handlers on a per sprite basis. Meaning each sprite/ev
 Scenes are a way to pipe events to a certain context. You can define sprites and events in one scene, and they will become inactive when you enter another scene, for which you can define a whole new set of sprites and events. It also allows you to write some setup or teardown code when entering or leaving scenes.
 
 When switching from one scene to another, the context and state of the previous scene is still retained. Meaning you can easily switch between scenes and continue where you previously had left off. A quick example would be accessing a menu or inventory in the middle of a level.
+
+### Animations
+
+This library provides a way to animate sprites in a fire-and-forget way. You provide a start state, an end state, and if desired intermediate states as well. The library will then take care of animating your sprite between those states, at a given duration. An advanced example, of what types of animations this library supports, can be found in the assets folder.
 
 ### Drawbacks
 
@@ -217,9 +222,214 @@ class MyOpeningScene(BaseScene):
         self.events.key(arcade.key.ESCAPE, exit)
 ```
 
+## Animations
+
+Animations in Arcade-Curtains should be easy to achieve. For this reason, the arcade `Sprite` class has been outfitted with an additional method, deftly named `animate()`.
+Don't worry, you won't lose this method if you subclass `arcade.Sprite`.
+
+Using the `animate` method will allow you to make an animation between the start and end states of your sprite. If you'd like more control, and intermediate states, the library provides additional objects to build more complex animations
+
+### Sprite.animate()
+
+The easiest and fastest way to get started is the `animate` method that is newly exposed on any Sprite instance.
+
+```python
+import arcade
+from arcade_curtains import BaseScene
+
+
+class MyOpeningScene(BaseScene):
+    def setup(self):
+        self.actors = arcade.SpriteList()
+        self.actor = arcade.Sprite()
+        self.actors.append(self.actor)
+
+    def enter_scene(self, previous_scene):
+        self.actor.animate(
+            duration=1, # duration of the animation in seconds
+            position=(100, 100), # will move the sprite from its current position to (100, 100) in 1 second
+        )
+```
+
+When this method is called, it will use the `AnimationManager` of the current active scene. If needed, it can be given a manager explicitly.
+
+```python
+import arcade
+from arcade_curtains import BaseScene
+
+
+class MyOpeningScene(BaseScene):
+    def leave_scene(self, next_scene):
+        next_scene.actor.animate(
+            duration=1, # duration of the animation in seconds
+            position=(100, 100),
+            manager=next_scene.animations
+        )
+```
+
+### KeyFrames
+
+If you'd like some more control over your animation, you can make use of `KeyFrame`s to define the states you'd like to visit during your animation, and wrap them up in a `Sequence`.
+
+`KeyFrames` allow you to define a state in which you want your sprite to be in at a certain point in time. The `KeyFrame` class allows you to set any of the attributes you would a sprite to set it's state.
+
+```python
+from arcade_curtains import KeyFrame
+
+frame = KeyFrame(
+    center_x=10,
+    center_y=10,
+    position=(10, 10), # position will be considered if both center_x/center_y and position are set
+    angle=50,
+    scale=1,
+    width=100,
+    height=100, # width/height will be considered if both widht/height and scale are set
+)
+```
+
+### Sequences
+
+`Sequence`s are used to glue together the `KeyFrame`s you've defined. Because you might want to set the state of your sprite with the same `KeyFrame` at different times of your animation, the `Sequence` class is where we define at which states in time we want to reach the state.
+
+```python
+from arcade_curtains import KeyFrame, Sequence
+
+frame1 = KeyFrame(position=(10, 10))
+frame2 = KeyFrame(position=(100, 100))
+
+seq = Sequence()
+seq.add_keyframe(0, frame1) # We want the sprite to reach the state of frame 1 after 0 seconds
+seq.add_keyframe(1, frame2) # We want the sprite to reach the state of frame 2 after 1 second
+seq.add_keyframe(2, frame1) # We want the sprite to reach the state of frame 1 again after 2 seconds
+
+# The animation duration of this sequence is 2 seconds.
+```
+
+Once you have a `Sequence`, you can then fire it explicitly by using the scene's animation manager, or pass it to the `animate` method of your sprite.
+
+```python
+import arcade
+from arcade_curtains import BaseScene, KeyFrame, Sequence
+
+
+class MyOpeningScene(BaseScene):
+    def setup(self):
+        self.actors = arcade.SpriteList()
+        self.actor = arcade.Sprite()
+        self.actors.append(self.actor)
+
+    def enter_scene(self, previous_scene):
+        seq = Sequence()
+        seq.add_keyframes(
+            (0, KeyFrame(angle=0)),
+            (1, KeyFrame(angle=180))
+        )
+        self.actor.animate(seq)
+        # Alternatively use self.animations.fire(self.actor, seq)
+```
+
+### Looping Sequences
+
+You can choose to have your sequence loop indefinitely. Once it had reached the final keyframe, it will restart its animation at the first keyframe.
+
+```python
+from arcade_curtains import Sequence
+
+seq = Sequence(loop=True)
+```
+
+### Reversing Sequences
+
+You can reverse a sequence, causing the last keyframe to be animated first.
+
+```python
+from arcade_curtains import Sequence
+
+seq = Sequence(is_reversed=True)
+```
+
+### Callbacks
+
+Both the Sprite method `animate`, and `Sequence.add_keyframe` allow you to execute a callback when a certain keyframe is reached. When defining a callback using `sprite.animate`, the callback defaults to the last `KeyFrame`.
+
+```python
+from arcade_curtains import KeyFrame, Sequence
+from my_game.triggers import trigger_end_animation_handler
+
+seq = Sequence()
+seq.add_keyframe(0, KeyFrame(position=(10, 10)))
+seq.add_keyframe(1, KeyFrame(position=(100, 100)), callback=trigger_end_animation_handler)
+```
+
+You can also define callbacks independently from keyframes, to be executed when a certain point in time is reached within your animation.
+
+```python
+from arcade_curtains import KeyFrame, Sequence
+from my_game.triggers import set_sprite_attack_intent_animation
+
+seq = Sequence()
+seq.add_keyframe(0, KeyFrame(position=(10, 10)))
+seq.add_keyframe(1, KeyFrame(position=(100, 100)))
+
+seq.add_callback(.5, callback=set_sprite_attack_intent_animation)
+```
+
+### Chaining animations
+
+Sometimes you'd only like to start an animation once another is done. Well then, I have good news for you, friend!
+
+Of course, you could just chain callbacks to achieve this, but this library provides a way to do it hastle free, and with the possibility to loop and have it's own "end of chain" callback.
+
+
+```python
+from arcade_curtains import KeyFrame, Sequence
+from my_game.triggers import set_sprite_attack_intent_animation
+from my_game.scenes import start_scene
+
+seq1 = Sequence()
+seq1.add_keyframes(
+    (0, KeyFrame(position=(10, 10))),
+    (1, KeyFrame(position=(100, 100)))
+)
+seq2 = Sequence()
+seq2.add_keyframes(
+    (0, KeyFrame(position=(100, 100))),
+    (1, KeyFrame(position=(10, 10))
+)
+
+chain = Chain(loop=True)
+chain.add_sequences(
+    (my_first_sprite, sequence1),
+    (my_second_sprite, sequence2)
+)
+
+start_scene.animations.fire(None, chain)
+
+```
+
+### Animation utility functions
+
+#### KeyFrame from sprite
+
+Create a keyframe from the current state of a sprite
+
+```python
+from arcade_curtains import KeyFrame
+
+frame = KeyFrame.from_sprite(my_sprite)
+frame = KeyFrame.from_sprite(my_sprite, only_keys=['angle', 'scale'])
+```
+
+#### Sequence from sprite
+
+Create a sequence with one keyframe at the 0 point in time, from the current state of a sprite
+
+```python
+from arcade_curtains import Sequence
+
+seq = Sequence.from_sprite(my_sprite)
+```
 
 ## Planned features
 
-A planned addition to this library is an animation manager that is able to animate until a condition is met. (An example of how that would work can be found in `examples/theatre.py::MoveAnimator`).
-
-The current Arcade animations are a bit black and white, meaning you have to manually turn it on or off. The animation manager would be a "fire and forget" principle. You could tell the sprite to move to a given location, or grow to a given scale, at a given speed, and you can trust the manager to take care of everything and cleaning up after the animation is done.
+A planned addition to this library is glueing sprites to other sprites. Meaning, if you glue instance A to instance B, and then animate A, B would then follow A.

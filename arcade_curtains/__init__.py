@@ -4,6 +4,7 @@ import arcade
 from pyglet import clock
 
 from .scene import BaseScene  # noqa
+from .animation import Sequence, KeyFrame, Chain  # noqa
 
 
 def bind(fn, window_fn):
@@ -34,13 +35,15 @@ class Curtains:
 
     def set_scene(self, name):
         if self.current_scene:
-            self.current_scene.leave_scene()
+            self.current_scene.leave_scene(self.scenes[name])
+        previous_scene = self.current_scene
         self.current_scene = self.scenes[name]
-        self.current_scene.enter_scene()
+        self.current_scene.enter_scene(previous_scene)
 
     def bind(self, window=None):
         if window:
             self.window = window
+            self.window.curtains = self
             for scene in self.scenes.values():
                 scene._bind(self.window, self)
         if not self.window:
@@ -60,7 +63,8 @@ class Curtains:
         for member, fn in members.items():
             window_fn = getattr(window, member)
             setattr(window, member, bind(fn, window_fn))
-        clock.schedule(window.update)
+        # clock.schedule(window.update)
+        clock.schedule_interval(window.update, 1 / 60)
 
     def on_draw(self):
         arcade.start_render()

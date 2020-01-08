@@ -111,7 +111,7 @@ class CharacterDevelopment(BaseScene):
 
         self.events.after_draw(draw_label)
 
-    def enter_scene(self):
+    def enter_scene(self, previous_scene):
         arcade.set_background_color(self.primary_color)
 
     def add_actor(self, sprite, x, y):
@@ -177,7 +177,7 @@ class DeusExMachina(BaseScene):
         self.add_label(btn_scene1, "Go To\nScene1", WHITE)
         self.add_label(btn_scene2, "Go To\nScene2", WHITE)
 
-    def enter_scene(self):
+    def enter_scene(self, previous_scene):
         arcade.set_background_color(GREEN)
 
     add_label = CharacterDevelopment.add_label
