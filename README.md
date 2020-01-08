@@ -10,6 +10,10 @@ A simple animation maker app written in 170 (300-ish if you include the code to 
 
 Arcade-curtains is a basic scene and event manager for [Arcade](https://github.com/pvcraven/arcade). The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
 
+![Showcasing scenes](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/theatre.gif)
+A gif showcasing scenes. [Run it yourself!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/theatre.py)
+
+
 ### Events
 
 There are two types of events.
@@ -129,7 +133,7 @@ def paint_border(sprite, x, y):
     sprite.set_border_texture()
 
 
-def unpain_border(sprite, x, y):
+def unpaint_border(sprite, x, y):
     sprite.unset_border_texture()
 
 
@@ -145,7 +149,7 @@ class MyOpeningScene(BaseScene):
         # add a hover event to this scene that paints a border whenever the mouse hovers over the sprite
         self.events.hover(self.actor, paint_border)
         # add an out event that reverts back to the original texture
-        self.events.out(self.actor, unpain_border)
+        self.events.out(self.actor, unpaint_border)
         # and one that kills the actor when clicked
         self.events.click(self.actor, kill_actor)
 ```
