@@ -1,3 +1,4 @@
 arcade
 dataclasses
+scipy
 pbr>=3.0
