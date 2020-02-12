@@ -65,7 +65,20 @@ def test_it_can_make_a_keyframe_from_sprite_with_target_keys():
 def test_it_can_transform_a_keyframe_to_list():
     s = sprite_instance()
     k = a.KeyFrame.from_sprite(s)
-    expected = [np.nan, np.nan, (10, 20), 50, np.nan, 100, 200]
+    expected = [
+        np.nan,
+        np.nan,
+        (10, 20),
+        50,
+        np.nan,
+        100,
+        200,
+        np.nan,
+        np.nan,
+        np.nan,
+        np.nan,
+        np.nan,
+    ]
     assert k.to_list() == expected
 
 
@@ -73,7 +86,7 @@ def test_it_can_add_a_keyframe_to_a_sequence():
     s = a.Sequence()
     k = a.KeyFrame()
     s.add_keyframe(0, k)
-    assert id(s[0]) == id(k)
+    assert id(s[0].frame) == id(k)
 
 
 def test_it_can_add_a_keyframes_to_a_sequence():
@@ -82,15 +95,15 @@ def test_it_can_add_a_keyframes_to_a_sequence():
     k2 = a.KeyFrame()
     some_callback = lambda: 1
     s.add_keyframes((0, k1), (1, k2, some_callback))
-    assert id(s[0]) == id(k1)
-    assert id(s[1]) == id(k2)
-    assert s.callbacks[1] == some_callback
+    assert id(s[0].frame) == id(k1)
+    assert id(s[1].frame) == id(k2)
+    assert s[1].callback == some_callback
 
 
 def test_it_can_make_a_sequence_from_a_sprite():
     s = a.Sequence().from_sprite(sprite_instance())
     assert len(s) == 1
-    assert s[0].position == (10, 20)
+    assert s[0].frame.position == (10, 20)
 
 
 def test_it_can_generate_points_in_time_from_a_sequence():
@@ -150,7 +163,7 @@ def test_it_can_make_a_sequence_from_kwargs():
     assert seq.total_time == 10
     assert seq.callbacks[10]
     assert len(seq) == 2
-    assert seq[10].position == (100, 400)
+    assert seq[10].frame.position == (100, 400)
 
 
 def test_it_can_make_a_sequence_from_keyframe():
@@ -164,7 +177,7 @@ def test_it_can_make_a_sequence_from_keyframe():
     assert seq.total_time == 10
     assert seq.callbacks[10]
     assert len(seq) == 2
-    assert seq[10].position == (100, 400)
+    assert seq[10].frame.position == (100, 400)
 
 
 @mock.patch('arcade_curtains.animation.AnimationManagerProxy._get_manager')

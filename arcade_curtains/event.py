@@ -25,7 +25,8 @@ EMPTY_SPRITE = Mock()
 
 
 def run_handlers(handlers, *args, **kwargs):
-    for handler in handlers:
+    for handler, handler_kwargs in handlers:
+        kwargs.update(handler_kwargs)
         handler(*args, **kwargs)
 
 
@@ -102,28 +103,31 @@ class EventHandler(object):
             return max(sprites)
         return EMPTY_SPRITE
 
-    def add_sprite_event(self, event_type, sprite, handler_function):
+    def add_sprite_event(self, event_type, sprite, handler_function,
+                         kwargs={}):
         self.all_sprites.append(sprite)
         self.all_sprites = list(set(self.all_sprites))
-        self.sprite_handlers[event_type][sprite].append(handler_function)
+        self.sprite_handlers[event_type][sprite].append((handler_function,
+                                                         kwargs))
 
-    def add_event(self, event_type, handler_function):
+    def add_event(self, event_type, handler_function, kwargs={}):
         if handler_function not in self.handlers[event_type]:
-            self.handlers[event_type].append(handler_function)
+            self.handlers[event_type].append((handler_function, kwargs))
 
     def remove_sprite_event(self, event_type, sprite, handler):
         if self.sprite_handlers[event_type].get(sprite, None):
-            if handler in self.sprite_handlers[event_type][sprite]:
-                self.sprite_handlers[event_type][sprite].remove(handler)
+            for details in self.sprite_handlers[event_type][sprite]:
+                if details[0] == handler:
+                    self.sprite_handlers[event_type][sprite].remove(details)
 
     def remove_event(self, event_type, handler):
-        while handler in self.handlers[event_type]:
-            self.handlers[event_type].remove(handler)
+        for details in self.handlers[event_type]:
+            if details[0] == handler:
+                self.handlers[event_type].remove(details)
 
     def remove_from_all(self, handler):
         for event_type, handlers in self.handlers.items():
-            if handler in handlers:
-                self.remove_event(event_type, handler)
+            self.remove_event(event_type, handler)
 
     def kill(self, sprite):
         for event in SpriteEvent:

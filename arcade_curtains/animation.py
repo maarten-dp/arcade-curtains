@@ -2,7 +2,21 @@ from scipy.interpolate import interp1d
 import numpy as np
 import arcade
 import attr
-from functools import wraps
+
+TRACKED_ATTRIBUTES = [
+    'center_x',
+    'center_y',
+    'position',
+    'angle',
+    'scale',
+    'width',
+    'height',
+    'alpha',
+    'left',
+    'right',
+    'bottom',
+    'top',
+]
 
 
 def interp2d(speed, points):
@@ -85,6 +99,28 @@ class AnimationManagerProxy:
         return manager
 
 
+class SequenceIndex:
+    def __init__(self, sequence, index):
+        self.sequence = sequence
+        self.index = index
+
+    @property
+    def frame(self):
+        return self.sequence.keyframes.get(self.index)
+
+    @frame.setter
+    def frame(self, value):
+        self.sequence.add_keyframe(self.index, value)
+
+    @property
+    def callback(self):
+        return self.sequence.callbacks.get(self.index)
+
+    @callback.setter
+    def callback(self, value):
+        self.sequence.add_callback(self.index, value)
+
+
 @attr.s
 class Sequence:
     default_interval = attr.ib(default=1)
@@ -97,7 +133,7 @@ class Sequence:
         return iter(self.keyframes.items())
 
     def __getitem__(self, key):
-        return self.keyframes[key]
+        return SequenceIndex(self, key)
 
     def __len__(self):
         return len(self.keyframes)
@@ -136,6 +172,7 @@ class Sequence:
 
     def add_callback(self, point_in_time, callback):
         self.callbacks[point_in_time] = callback
+        self._sort(self.callbacks)
 
     @property
     def total_time(self):
@@ -149,16 +186,13 @@ class Sequence:
         pits = {}
         interp_fn = {'position': interp2d}
 
-        attributes = [
-            'center_x', 'center_y', 'position', 'angle', 'scale', 'width',
-            'height'
-        ]
+        attributes = TRACKED_ATTRIBUTES
         for idx, attribute in enumerate(attributes):
             points = all_points[idx]
             if len(points) == 1:
                 points = points * 2
             if self.is_reversed:
-                points = reversed(points)
+                points = list(reversed(points))
 
             include = [_valid(p) for p in points]
             if not any(include):
@@ -186,6 +220,11 @@ class KeyFrame:
     scale = attr.ib(default=np.nan)
     width = attr.ib(default=np.nan)
     height = attr.ib(default=np.nan)
+    alpha = attr.ib(default=np.nan)
+    top = attr.ib(default=np.nan)
+    bottom = attr.ib(default=np.nan)
+    left = attr.ib(default=np.nan)
+    right = attr.ib(default=np.nan)
 
     @classmethod
     def from_sprite(cls, sprite, only_keys=None):
@@ -197,17 +236,11 @@ class KeyFrame:
         return cls(**kwargs)
 
     def to_list(self):
-        return [
-            self.center_x, self.center_y, self.position, self.angle,
-            self.scale, self.width, self.height
-        ]
+        return [getattr(self, attr) for attr in TRACKED_ATTRIBUTES]
 
     def to_dict(self):
         result = {}
-        for key in [
-                'center_x', 'center_y', 'position', 'angle', 'scale', 'width',
-                'height'
-        ]:
+        for key in TRACKED_ATTRIBUTES:
             value = getattr(self, key)
             if _valid(value):
                 result[key] = value
@@ -222,11 +255,11 @@ class Animator:
         self._total_time = sequence.total_time
         self.pits = sequence._to_point_in_times()
         self.callbacks = iter(sequence.callbacks.items())
-        self._upcoming_callback = self.upcoming_callback()
+        self.upcoming_callback()
 
     def upcoming_callback(self):
         try:
-            return next(self.callbacks)
+            self._upcoming_callback = next(self.callbacks)
         except StopIteration:
             self._upcoming_callback = None
 
@@ -248,8 +281,8 @@ class Animator:
             return
         time, callback = self._upcoming_callback
         if time <= self._elapsed_time:
-            callback()
             self.upcoming_callback()
+            callback()
 
     @property
     def finished(self):
@@ -318,26 +351,3 @@ class Chain:
                 self.anim_queue = None
             else:
                 self.finished = True
-
-
-def modified_init(orig_init):
-    @wraps(orig_init)
-    def init(self, *args, **kwargs):
-        orig_init(self, *args, **kwargs)
-        self.animate = AnimationManagerProxy(self)
-
-    return init
-
-
-class CurtainsMeta(type):
-    def __init__(self, name, bases, dct):
-        super().__init__(name, bases, dct)
-        self.__init__ = modified_init(self.__init__)
-
-
-class Sprite(arcade.Sprite, metaclass=CurtainsMeta):
-    pass
-
-
-arcade.Sprite = Sprite
-arcade.sprite.Sprite = Sprite

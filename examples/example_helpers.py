@@ -9,6 +9,7 @@ GREEN = arcade.color.GREEN
 BRICK_RED = arcade.color.BRICK_RED
 TEAL = arcade.color.TEAL
 ROYAL_PURPLE = arcade.color.ROYAL_PURPLE
+CORNFLOWER_BLUE = arcade.color.CORNFLOWER_BLUE
 
 
 class BasicSprite(arcade.Sprite):
@@ -23,6 +24,7 @@ class BasicSprite(arcade.Sprite):
         self.textures = [
             self.texture,
             self.get_texture(self.size, TEAL),
+            self.get_texture(self.size, CORNFLOWER_BLUE),
         ]
 
     def get_texture(self, size, color):
@@ -45,7 +47,8 @@ class Button(SquareSprite):
 
         events.hover(self, self.on_hover)
         events.out(self, self.on_out)
-        events.click(self, self.on_click)
+        events.down(self, self.down)
+        events.up(self, self.up)
 
         super().__init__(*args, **kwargs)
 
@@ -63,8 +66,11 @@ class Button(SquareSprite):
     def on_out(self, *args, **kwargs):
         self.set_texture(0)
 
-    def on_click(self, *args, **kwargs):
-        pass
+    def down(self, *args, **kwargs):
+        self.set_texture(2)
+
+    def up(self, *args, **kwargs):
+        self.set_texture(1)
 
 
 class ButtonGroup:
@@ -161,11 +167,11 @@ class TabGroup(ButtonGroup):
 
 
 class CircleSprite(arcade.Sprite):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, color=arcade.color.WHITE, size=100, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.textures = [
-            arcade.make_soft_circle_texture(100, arcade.color.WHITE, 255, 255),
-            arcade.make_soft_circle_texture(100, arcade.color.GREEN, 255, 255)
+            arcade.make_soft_circle_texture(size, color, 255, 255),
+            arcade.make_soft_circle_texture(size, arcade.color.GREEN, 255, 255)
         ]
         self.texture = self.textures[0]
         self.center_x = 70
