@@ -164,7 +164,6 @@ class AnchorPoint:
     def __init__(self, center_x, center_y):
         self._center_x = center_x
         self._center_y = center_y
-        self._position = (center_x, center_y)
         self.boats = set()
 
     def dock(self, boat):
@@ -180,7 +179,7 @@ class AnchorPoint:
 
     @property
     def position(self):
-        return self._position
+        return self.center_x, self.center_y
 
     @center_x.setter
     def center_x(self, value):
