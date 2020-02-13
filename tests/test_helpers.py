@@ -94,7 +94,7 @@ def test_it_can_delay_setting_an_attribute(sprite):
     assert sprite.health == 20
 
 
-@pytest.mark.parametrize('op', [op.lt, op.gt, op.eq, op.le, op.ge])
+@pytest.mark.parametrize('op', [op.lt, op.gt, op.eq, op.le, op.ge, op.ne])
 def test_it_can_build_a_trigger(sprite, op):
     health = TriggerBuilder('health')
     trigger = op(health, 10)
@@ -137,3 +137,9 @@ def test_it_can_make_a_widget():
     assert wdg.topright == (400, 400)
     assert wdg.bottomleft == (200, 200)
     assert wdg.bottomright == (400, 200)
+    assert wdg.bottom == 200
+    assert wdg.top == 400
+    assert wdg.left == 200
+    assert wdg.right == 400
+    assert wdg.width == 200
+    assert wdg.height == 200
