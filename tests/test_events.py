@@ -22,6 +22,14 @@ def test_it_can_fire_sprite_events(sprite, event, triggers):
     sprite.handler.assert_called_once()
 
 
+def test_it_can_fire_callbacks_with_args(sprite):
+    ev = EventHandler()
+    kwargs = {'default': True, 'attribute': 'health'}
+    ev.down(sprite, sprite.handler, kwargs)
+    ev.trigger_down(50, 50)
+    sprite.handler.assert_called_with(sprite, 50, 50, **kwargs)
+
+
 @pytest.mark.parametrize("event,triggers", [
     ('frame', [('trigger_frame', (50, ))]),
     ('before_draw', [('trigger_before_draw', ())]),

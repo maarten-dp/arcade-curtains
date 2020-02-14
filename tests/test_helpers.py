@@ -1,6 +1,6 @@
 import pytest
 import arcade_curtains as c
-from arcade_curtains.helpers import TriggerBuilder, Widget
+from arcade_curtains.helpers import TriggerAttr, Widget
 import operator as op
 import arcade
 from unittest import mock
@@ -57,7 +57,7 @@ def test_it_can_observe_after_change():
 def test_it_can_observe_trigger_change():
     observable = c.helpers.ObservableSprite()
     handler = mock.Mock()
-    health = TriggerBuilder('health')
+    health = TriggerAttr('health')
     observable.trigger(health > 10, handler)
     observable.health = 11
     handler.assert_called_once()
@@ -96,7 +96,7 @@ def test_it_can_delay_setting_an_attribute(sprite):
 
 @pytest.mark.parametrize('op', [op.lt, op.gt, op.eq, op.le, op.ge, op.ne])
 def test_it_can_build_a_trigger(sprite, op):
-    health = TriggerBuilder('health')
+    health = TriggerAttr('health')
     trigger = op(health, 10)
     with pytest.raises(NotImplementedError):
         trigger.check(10)

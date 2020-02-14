@@ -71,7 +71,7 @@ class Sprite(arcade.Sprite, PositionHelperMixin, metaclass=CurtainsMeta):
     pass
 
 
-class TriggerBuilder:
+class TriggerAttr:
     def __init__(self, attribute):
         self.attribute = attribute
 

@@ -14,6 +14,40 @@ Arcade-curtains is a basic scene and event manager for [Arcade](https://github.c
 
 A gif showcasing scenes. [Have a look at the code!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/theatre.py)
 
+## ToC
+- [Introduction](#introduction)
+- [ToC](#toc)
+  * [Events](#events)
+  * [Scenes](#scenes)
+  * [Animations](#animations)
+  * [Drawbacks](#drawbacks)
+- [Getting started](#getting-started)
+  * [Binding Curtains to Arcade](#binding-curtains-to-arcade)
+  * [Creating a Scene](#creating-a-scene)
+  * [Sprite events](#sprite-events)
+  * [Global events](#global-events)
+- [Animations](#animations-1)
+  * [Sprite.animate()](#spriteanimate--)
+  * [KeyFrames](#keyframes)
+  * [Sequences](#sequences)
+  * [Looping Sequences](#looping-sequences)
+  * [Reversing Sequences](#reversing-sequences)
+  * [Callbacks](#callbacks)
+  * [Chaining animations](#chaining-animations)
+  * [Animation utility functions](#animation-utility-functions)
+    + [KeyFrame from sprite](#keyframe-from-sprite)
+    + [Sequence from sprite](#sequence-from-sprite)
+- [Helpers](#helpers)
+  * [General utilities](#general-utilities)
+    + [delay_set_attribute](#delay-set-attribute)
+    + [Position helper](#position-helper)
+  * [ObservableSprite](#observablesprite)
+    + [before_change/after_change events](#before-change-after-change-events)
+    + [triggers](#triggers)
+  * [Widgets](#widgets)
+    + [AnchorPoint](#anchorpoint)
+    + [Widget](#widget)
+
 
 ### Events
 
@@ -159,6 +193,12 @@ class MyOpeningScene(BaseScene):
         self.events.click(self.actor, kill_actor)
 ```
 
+You are able to provide default arguments to pass to the callback function in the following manner:
+
+```python
+events.click(self.actor, kill_actor, {'method': 'very slowly'})
+```
+
 ### Global events
 
 Some events are not linkable to a sprite, but you would still like to define some handlers to it. For instance the `frame` event, which is triggered at every frame. You could treat it as a sprite event, but it wouldn't make sense as it doesn't get triggered due to sprite interaction. Instead, you can just attach a handler function, that interracts with the desired sprite, to the `frame` event.
@@ -284,6 +324,11 @@ frame = KeyFrame(
     scale=1,
     width=100,
     height=100, # width/height will be considered if both widht/height and scale are set
+    alpha=255,
+    # left = 100,
+    # right = 100,
+    # top = 100,
+    # bottom = 100,
 )
 ```
 
@@ -326,6 +371,27 @@ class MyOpeningScene(BaseScene):
         )
         self.actor.animate(seq)
         # Alternatively use self.animations.fire(self.actor, seq)
+```
+
+Alternatively, you are able to interact with a Sequence in the following way
+
+```python
+import arcade
+from arcade_curtains import BaseScene, KeyFrame, Sequence
+
+
+class MyOpeningScene(BaseScene):
+    def setup(self):
+        self.actors = arcade.SpriteList()
+        self.actor = arcade.Sprite()
+        self.actors.append(self.actor)
+
+    def enter_scene(self, previous_scene):
+        seq = Sequence()
+        seq[0].frame = KeyFrame(angle=0)
+        seq[1].frame = KeyFrame(angle=180)
+        seq[.5].callback = self.actor.do_something
+        self.actor.animate(seq)
 ```
 
 ### Looping Sequences
@@ -430,6 +496,88 @@ from arcade_curtains import Sequence
 seq = Sequence.from_sprite(my_sprite)
 ```
 
-## Planned features
+## Helpers
 
-A planned addition to this library is glueing sprites to other sprites. Meaning, if you glue instance A to instance B, and then animate A, B would then follow A.
+This module provides a number of interesting things to allow you to write your game faster and more smoothly.
+
+### General utilities
+
+#### delay_set_attribute
+
+This is a small helper function that allows you to set an attribute on an object as a callback.
+
+```python
+# Will set the health attribute to 10 when clicked
+events.click(sprite, delay_set_attribute(sprite, 'health', 10))
+```
+
+#### Position helper
+
+`arcade.Sprite`s and everything that subclasses it are outfitted with `topleft`, `topright`, `bottomleft`, `bottomright` coordinates. It functions the same as position, meaning it returns an x and a y coordinate.
+
+A small disclaimer, to be conform with position, the return values of these properties are (x, y) which is the inverse of the naming, but "lefttop" doesn't really roll off the tongue.
+
+### ObservableSprite
+
+An `ObservableSprite` is a subclass from `arcade.Sprite` that allows you to attach handlers to attribute modifications.
+
+#### before_change/after_change events
+
+You can define a callback and have it be called whenever the targetted attribute changes
+
+```python
+sprite.before_change('health', controller.validate_health_change)
+sprite.after_change('health', controller.notify_health_change)
+```
+
+#### triggers
+
+An `ObservableSprite` allows you to define a trigger that is run whenever a certain condition is met. For instance, you want your handler to run if health is equal or below 0.
+
+```python
+from arcade_curtains import TriggerAttr
+# Build a triggerable attribute definition
+health = TriggerAttr('health')
+sprite.trigger(health < 0, sprite.die)
+```
+
+### Widgets
+
+A `Widget` is a baseclass for grouping `Sprite`s into a widget. It allows a number of sprites to work together, while still maintaining the fine grained control over each sprite. `Widget`s use `AnchorPoint`s underneath to work as a group.
+
+#### AnchorPoint
+
+An `AnchorPoint` is an object that is just an `x, y` coordinate, but you can affix sprites to this anchor. Whenever you move the anchor, all affixed sprites move with it.
+
+```python
+sprite1.position = (100, 100)
+sprite2.position = (200, 200)
+anchor = AnchorPoint.from_sprite(sprite1, 'position')
+anchor.dock(sprite2)
+# Will move sprite1 and sprite2 relative to the anchor
+anchor.position = (300, 300)
+assert sprite1.position == (300, 300)
+assert sprite2.position == (400, 400)
+```
+
+#### Widget
+
+You can consider a `Widget` to be a "view" where you can define your sprites relative to the (0, 0) coordinate. `Widget` starting coordinates will be inferred from the defined sprites within the widget. After initialisation you are able to manipulate these, to move your widget to the desired location.
+
+The baseclass is outfitted with a `self.sprites` where you can add the sprites defined in your widget. After initializing your widget, you will have to register a spritelist to have your sprites drawn on screen.
+
+```python
+class MyWidget(Widget):
+    def setup_widget(self):
+        sprite1 = arcade.Sprite(TEXTURE1)
+        sprite1.bottomleft = (0, 0)
+        sprite2 = arcade.Sprite(TEXTURE2)
+        sprite2.bottomleft = sprite1.topleft
+        self.sprites.extend([sprite1, sprite2])
+
+spritelist = arcade.SpriteList()
+widget = MyWidget()
+widget.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+# register the sprites to an arcade spritelist
+widget.register(spritelist)
+```

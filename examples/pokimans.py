@@ -3,7 +3,7 @@ import random
 
 from arcade_curtains import (Curtains, BaseScene, ObservableSprite, KeyFrame,
                              Sequence, Widget)
-from arcade_curtains.helpers import delay_set_attribute, TriggerBuilder
+from arcade_curtains.helpers import delay_set_attribute, TriggerAttr
 from example_helpers import SquareSprite, Button, CircleSprite
 
 STATE = None
@@ -141,20 +141,20 @@ class CharacterPortrait(Widget):
         if inverse:
             topleft = 121
 
-        padding = CircleSprite(size=80, color=c.GRAY)
+        padding = CircleSprite(size=80, color=c.SADDLE_BROWN)
         padding.topleft = (topleft, 55)
 
-        portrait = CircleSprite(size=70, color=c.WHITE)
+        portrait = CircleSprite(size=70, color=c.PERU)
         portrait.topleft = (topleft + 5, 50)
 
         backdrop = SquareSprite()
-        backdrop.color = c.GRAY
+        backdrop.color = c.SADDLE_BROWN
         backdrop.width = 108
         backdrop.height = 85
         backdrop.position = self.bars['stamina'].position
-        backdropleft = CircleSprite(size=85, color=c.GRAY)
+        backdropleft = CircleSprite(size=85, color=c.SADDLE_BROWN)
         backdropleft.position = (backdrop.left, backdrop.center_y)
-        backdropright = CircleSprite(size=85, color=c.GRAY)
+        backdropright = CircleSprite(size=85, color=c.SADDLE_BROWN)
         backdropright.position = (backdrop.right, backdrop.center_y)
 
         for sprite in [backdrop, backdropright, backdropleft]:
@@ -166,7 +166,7 @@ class CharacterPortrait(Widget):
 class Menu(Widget):
     def setup_widget(self, events, hero):
         backdrop = SquareSprite()
-        backdrop.color = arcade.color.GRAY
+        backdrop.color = arcade.color.SADDLE_BROWN
         backdrop.width = 245
         backdrop.height = 95
         backdrop.bottomleft = (0, 0)
@@ -314,11 +314,11 @@ class Controller:
         get_state().add_handler(self.char.update)
         char.special = 0
 
-        stamina = TriggerBuilder('stamina')
+        stamina = TriggerAttr('stamina')
         self.char.trigger(stamina >= 100, self.get_input)
         self.char.trigger(stamina == 0, self.cleanup)
 
-        health = TriggerBuilder('health')
+        health = TriggerAttr('health')
         self.char.trigger(health == 0, char.die)
 
     def get_input(self):
@@ -518,9 +518,7 @@ class Window(arcade.Window):
 
 
 def run(window):
-    print('setting up')
     window.setup()
-    print("done")
     try:
         arcade.run()
     except KeyboardInterrupt:

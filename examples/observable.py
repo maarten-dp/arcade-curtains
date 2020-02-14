@@ -1,7 +1,7 @@
 import arcade
 import example_helpers as eh
 from arcade_curtains import ObservableSprite
-from arcade_curtains.helpers import TriggerBuilder
+from arcade_curtains.helpers import TriggerAttr
 
 
 class CircleSprite(eh.CircleSprite, ObservableSprite):
@@ -26,7 +26,7 @@ class Window(arcade.Window):
         def set_mod(mod):
             self.mod = mod
 
-        center_x = TriggerBuilder('center_x')
+        center_x = TriggerAttr('center_x')
         self.sprite1.trigger(center_x > 400, lambda: set_mod(-1))
         self.sprite1.trigger(center_x < 100, lambda: set_mod(1))
         self.sprite1.after_change('center_x', keep_pace)
