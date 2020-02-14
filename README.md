@@ -560,6 +560,10 @@ assert sprite1.position == (300, 300)
 assert sprite2.position == (400, 400)
 ```
 
+This example shows all orbs are being anchored on an anchorpoint that is defined on the largest orb's position. When moving the large orb, the smaller, orbing orbs are moved as well
+
+![Showcasing Anchor](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/anchor.mp4)
+
 #### Widget
 
 You can consider a `Widget` to be a "view" where you can define your sprites relative to the (0, 0) coordinate. `Widget` starting coordinates will be inferred from the defined sprites within the widget. After initialisation you are able to manipulate these, to move your widget to the desired location.
