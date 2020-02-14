@@ -530,6 +530,18 @@ sprite.before_change('health', controller.validate_health_change)
 sprite.after_change('health', controller.notify_health_change)
 ```
 
+In the example below, the bottom circle is being moved every frame and the top circle has an `after_change` handler defined as followed
+
+```python
+mod = 1
+def keep_pace(sprite, attribute, old, new):
+    setattr(sprite2, attribute, new)
+
+sprite1.after_change('center_x', keep_pace)
+```
+
+![Showcasing Anchor](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/observe.gif)
+
 #### triggers
 
 An `ObservableSprite` allows you to define a trigger that is run whenever a certain condition is met. For instance, you want your handler to run if health is equal or below 0.
