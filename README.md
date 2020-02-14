@@ -6,6 +6,10 @@
 
 A simple animation maker app written in 170 lines (300-ish if you include the code to enable the UI Button elements) using Arcade and Arcade-Curtains. [Have a look at the code!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/animation_maker.py)
 
+![Showcasing curtains](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/pokimans.gif)
+
+A small game showcasing all features in Arcade-Curtains. It's a fight scene inspired by Pokémon/Final Fantasy written in 500 lines, using only primitive shapes (combining these shapes, makes up for a good amount of those 500 lines ;) ). [Have a look at the code!](https://github.com/maarten-dp/arcade-curtains/blob/master/examples/pokimans.py)
+
 ## Introduction
 
 Arcade-curtains is a basic scene and event manager for [Arcade](https://github.com/pvcraven/arcade). The main goal is to provide a way to write event driven games instead of plastering your code with ifs and elses. This is achieved by writing handlers for events.
@@ -530,7 +534,7 @@ sprite.before_change('health', controller.validate_health_change)
 sprite.after_change('health', controller.notify_health_change)
 ```
 
-In the example below, the bottom circle is being moved every frame and the top circle has an `after_change` handler defined as followed
+In the example below, the bottom circle is being moved every frame and has an `after_change` handler defined, to set the second sprite, as followed
 
 ```python
 mod = 1
