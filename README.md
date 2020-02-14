@@ -562,7 +562,7 @@ assert sprite2.position == (400, 400)
 
 This example shows all orbs are being anchored on an anchorpoint that is defined on the largest orb's position. When moving the large orb, the smaller, orbing orbs are moved as well
 
-![Showcasing Anchor](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/anchor.mp4)
+![Showcasing Anchor](https://raw.githubusercontent.com/maarten-dp/arcade-curtains/master/assets/anchor.gif)
 
 #### Widget
 
