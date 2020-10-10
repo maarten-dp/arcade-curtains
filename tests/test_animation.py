@@ -234,3 +234,58 @@ def test_it_can_chain_animations():
     assert inst1.position == (10, 100)
     assert inst2.position == (10, 100)
     assert chain.finished
+
+
+def test_it_can_call_animation_kill_on_sprite_kill():
+    sprite = arcade.Sprite()
+    animate = mock.Mock()
+    sprite.animate = animate
+    sprite.kill()
+    animate.kill.assert_called_once()
+
+
+@mock.patch('arcade.get_window')
+def test_it_can_kill_a_sprite_in_animation_manager(window):
+    sprite = mock.Mock(position=(0, 0))
+    manager = a.AnimationManager()
+    proxy = a.AnimationManagerProxy(sprite)
+    scene = mock.Mock(animations=manager)
+    window().curtains = mock.Mock(scenes={'name': scene})
+
+    proxy(manager=manager, position=(100, 400), duration=10)
+    assert manager.animations[0].sprite is sprite
+    proxy.kill()
+    assert not manager.animations
+
+
+def test_it_doesnt_break_when_killing_on_unstarted_chain():
+    chain = a.Chain()
+    assert not chain.kill(mock.Mock())
+
+
+def test_it_can_kill_from_chain_if_current_animator_has_sprite():
+    chain = a.Chain()
+    chain.anim_queue = 1
+    sprite = mock.Mock()
+    current_animator = mock.Mock(sprite=sprite)
+    chain.current_animator = current_animator
+    assert chain.kill(sprite)
+
+
+def test_it_can_kill_from_chain_if_sprite_is_in_future_animations():
+    chain = a.Chain()
+    sprite = mock.Mock()
+    chain.anim_queue = iter([(sprite, None)])
+    current_animator = mock.Mock(sprite=mock.Mock())
+    chain.current_animator = current_animator
+    assert chain.kill(sprite)
+
+
+def test_it_can_reconstruct_anim_queue_on_invalid_kill():
+    chain = a.Chain()
+    anim = (mock.Mock(), None)
+    chain.anim_queue = iter([anim])
+    current_animator = mock.Mock(sprite=mock.Mock())
+    chain.current_animator = current_animator
+    assert not chain.kill(mock.Mock())
+    assert list(chain.anim_queue) == [anim]

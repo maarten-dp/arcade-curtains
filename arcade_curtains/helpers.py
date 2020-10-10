@@ -27,6 +27,15 @@ def modified_init(orig_init):
     return init
 
 
+def modified_kill(orig_kill):
+    @wraps(orig_kill)
+    def kill(self, *args, **kwargs):
+        orig_kill(self, *args, **kwargs)
+        self.animate.kill()
+
+    return kill
+
+
 class PositionHelperMixin:
     @property
     def topleft(self):
@@ -65,6 +74,7 @@ class CurtainsMeta(type):
     def __init__(self, name, bases, dct):
         super().__init__(name, bases, dct)
         self.__init__ = modified_init(self.__init__)
+        self.kill = modified_kill(self.kill)
 
 
 class Sprite(arcade.Sprite, PositionHelperMixin, metaclass=CurtainsMeta):

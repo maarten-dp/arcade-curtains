@@ -60,6 +60,11 @@ class AnimationManager:
             if animator.finished:
                 self.animations.remove(animator)
 
+    def kill(self, sprite):
+        for animator in self.animations[:]:
+            if animator.kill(sprite):
+                self.animations.remove(animator)
+
 
 class AnimationManagerProxy:
     def __init__(self, sprite):
@@ -71,6 +76,11 @@ class AnimationManagerProxy:
         if not sequence and kwargs:
             sequence = self._sequence_from_kwargs(**kwargs)
         self._get_manager(manager).fire(self.sprite, sequence)
+
+    def kill(self):
+        curtains = arcade.get_window().curtains
+        for scene in curtains.scenes.values():
+            scene.animations.kill(self.sprite)
 
     def _sequence_from_kwargs(self, **kwargs):
         callback = kwargs.pop('callback', None)
@@ -276,6 +286,11 @@ class Animator:
             if self.loop:
                 self._elapsed_time = 0
 
+    def kill(self, sprite):
+        if sprite is self.sprite:
+            return True
+        return False
+
     def check_for_callback(self):
         if not self._upcoming_callback:
             return
@@ -338,6 +353,22 @@ class Chain:
             mod = anim.elapsed_time - anim._total_time
             self._next_animator()
             self.current_animator.blip(mod)
+
+    def kill(self, sprite):
+        if self.anim_queue is None:
+            return False
+
+        if self.current_animator.sprite is sprite:
+            return True
+
+        anim_queue = []
+        for anim_sprite, sequence in self.anim_queue:
+            anim_queue.append((anim_sprite, sequence))
+            if sprite is anim_sprite:
+                return True
+        self.anim_queue = iter(anim_queue)
+
+        return False
 
     def _next_animator(self):
         try:
