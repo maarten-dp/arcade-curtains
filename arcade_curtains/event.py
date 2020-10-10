@@ -19,6 +19,7 @@ class Event(Enum):
     FRAME = 7
     BEFORE_DRAW = 8
     AFTER_DRAW = 9
+    SCROLL = 10
 
 
 EMPTY_SPRITE = Mock()
@@ -95,6 +96,9 @@ class EventHandler(object):
     def trigger_key_press(self, key):
         run_handlers(self.handlers.get(key, []))
 
+    def trigger_scroll(self, x, y, scroll_x, scroll_y):
+        run_handlers(self.handlers[Event.SCROLL], x, y, scroll_x, scroll_y)
+
     def get_sprite_at(self, *coords):
         sprites = arcade.SpriteList()
         sprites.sprite_list = self.all_sprites
@@ -149,6 +153,7 @@ class EventHandler(object):
     frame = partialmethod(add_event, Event.FRAME)
     before_draw = partialmethod(add_event, Event.BEFORE_DRAW)
     after_draw = partialmethod(add_event, Event.AFTER_DRAW)
+    scroll = partialmethod(add_event, Event.SCROLL)
 
     remove_click = partialmethod(remove_sprite_event, SpriteEvent.CLICK)
     remove_hover = partialmethod(remove_sprite_event, SpriteEvent.HOVER)
@@ -159,6 +164,7 @@ class EventHandler(object):
     remove_frame = partialmethod(remove_event, Event.FRAME)
     remove_before_draw = partialmethod(remove_event, Event.BEFORE_DRAW)
     remove_after_draw = partialmethod(remove_event, Event.AFTER_DRAW)
+    remove_scroll = partialmethod(remove_event, Event.SCROLL)
 
     key = add_event
     remove_key = remove_event

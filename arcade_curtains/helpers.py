@@ -44,6 +44,22 @@ class PositionHelperMixin:
     def bottomright(self):
         return (self.right, self.bottom)
 
+    @property
+    def centerleft(self):
+        return (self.left, self.center_y)
+
+    @property
+    def centerright(self):
+        return (self.right, self.center_y)
+
+    @property
+    def topcenter(self):
+        return (self.center_x, self.top)
+
+    @property
+    def bottomcenter(self):
+        return (self.center_x, self.bottom)
+
     @topleft.setter
     def topleft(self, position):
         self.left, self.top = position
@@ -59,6 +75,22 @@ class PositionHelperMixin:
     @bottomright.setter
     def bottomright(self, position):
         self.right, self.bottom = position
+
+    @centerleft.setter
+    def centerleft(self, position):
+        self.left, self.center_y = position
+
+    @centerright.setter
+    def centerright(self, position):
+        self.right, self.center_y = position
+
+    @topcenter.setter
+    def topcenter(self, position):
+        self.center_x, self.top = position
+
+    @bottomcenter.setter
+    def bottomcenter(self, position):
+        self.center_x, self.bottom = position
 
 
 class CurtainsMeta(type):
@@ -207,13 +239,20 @@ class AnchorPoint:
 
 
 class Widget(PositionHelperMixin):
-    def __init__(self, center_x=0, center_y=0, **kwargs):
+    def __init__(self,
+                 center_x=0,
+                 center_y=0,
+                 fixed_width=None,
+                 fixed_height=None,
+                 **kwargs):
         self.sprites = []
+        self.fixed_width = fixed_width
+        self.fixed_height = fixed_height
+        self.anchor = AnchorPoint(center_x=center_x, center_y=center_y)
         self.setup_widget(**kwargs)
-        self.anchor = AnchorPoint(
-            center_x=self.center_x, center_y=self.center_y)
         for sprite in self.sprites:
             self.anchor.dock(sprite)
+
         self.anchor.position = (center_x, center_y)
         self.post_setup()
 
@@ -224,9 +263,12 @@ class Widget(PositionHelperMixin):
         pass
 
     def _get_widget_bounds(self):
-        return self._get_x_bounds, self._get_y_bounds
+        return self._get_x_bounds(), self._get_y_bounds()
 
     def _get_y_bounds(self):
+        if self.fixed_height:
+            return (self.anchor.center_y + (self.fixed_height / 2),
+                    self.anchor.center_y - (self.fixed_height / 2))
         if not self.sprites:
             return (0, 0)
         top = self.sprites[0].top
@@ -237,6 +279,9 @@ class Widget(PositionHelperMixin):
         return top, bottom
 
     def _get_x_bounds(self):
+        if self.fixed_width:
+            return (self.anchor.center_x - (self.fixed_width / 2),
+                    self.anchor.center_x + (self.fixed_width / 2))
         if not self.sprites:
             return (0, 0)
         left = self.sprites[0].left
@@ -325,6 +370,11 @@ class Widget(PositionHelperMixin):
     def register(self, spritelist):
         for sprite in self.sprites:
             spritelist.append(sprite)
+
+    def draw_hit_box(self):
+        (x1, x2), (y1, y2) = self._get_widget_bounds()
+        points = [(x1, y1), (x1, y2), (x2, y2), (x2, y1)]
+        arcade.draw_polygon_outline(points, arcade.color.RED, 5)
 
 
 arcade.Sprite = Sprite

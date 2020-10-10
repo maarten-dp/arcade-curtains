@@ -16,6 +16,14 @@ TRACKED_ATTRIBUTES = [
     'right',
     'bottom',
     'top',
+    'topleft',
+    'topright',
+    'bottomleft',
+    'bottomright',
+    'centerleft',
+    'centerright',
+    'topcenter',
+    'bottomcenter',
 ]
 
 
@@ -184,7 +192,17 @@ class Sequence:
             duration.append(duration[0] + 0.0001)
         all_points = list(zip(*[k.to_list() for k in self.keyframes.values()]))
         pits = {}
-        interp_fn = {'position': interp2d}
+        interp_fn = {
+            'position': interp2d,
+            'topleft': interp2d,
+            'topright': interp2d,
+            'bottomleft': interp2d,
+            'bottomright': interp2d,
+            'centerleft': interp2d,
+            'centerright': interp2d,
+            'topcenter': interp2d,
+            'bottomcenter': interp2d
+        }
 
         attributes = TRACKED_ATTRIBUTES
         for idx, attribute in enumerate(attributes):
@@ -205,9 +223,9 @@ class Sequence:
         return pits
 
     @classmethod
-    def from_sprite(cls, sprite):
+    def from_sprite(cls, sprite, keys):
         sequence = cls()
-        sequence.add_keyframe(0, KeyFrame.from_sprite(sprite))
+        sequence.add_keyframe(0, KeyFrame.from_sprite(sprite, keys))
         return sequence
 
 
@@ -225,6 +243,14 @@ class KeyFrame:
     bottom = attr.ib(default=np.nan)
     left = attr.ib(default=np.nan)
     right = attr.ib(default=np.nan)
+    topleft = attr.ib(default=np.nan)
+    topright = attr.ib(default=np.nan)
+    bottomleft = attr.ib(default=np.nan)
+    bottomright = attr.ib(default=np.nan)
+    centerleft = attr.ib(default=np.nan)
+    centerright = attr.ib(default=np.nan)
+    topcenter = attr.ib(default=np.nan)
+    bottomcenter = attr.ib(default=np.nan)
 
     @classmethod
     def from_sprite(cls, sprite, only_keys=None):
