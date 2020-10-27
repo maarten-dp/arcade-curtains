@@ -19,11 +19,17 @@ def bind(fn, window_fn):
     return decorator
 
 
+class Options:
+    def __init__(self, kwargs):
+        self.draw_kwargs = kwargs.get('draw_kwargs', {})
+
+
 class Curtains:
-    def __init__(self, window=None):
+    def __init__(self, window=None, **kwargs):
         self.current_scene = None
         self.window = None
         self.scenes = {}
+        self.options = Options(kwargs)
         if window:
             self.bind(window)
 

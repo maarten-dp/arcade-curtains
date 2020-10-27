@@ -11,10 +11,9 @@ class Scene(BaseScene):
         pass
 
 
-@pytest.fixture(scope='function')
-def curtains():
+def _curtains(**kwargs):
     window = Mock()
-    curtains = Curtains(window)
+    curtains = Curtains(window, **kwargs)
     scene1 = Scene()
     scene2 = Scene()
     curtains.add_scenes({
@@ -23,6 +22,11 @@ def curtains():
     })
     curtains.set_scene('scene1')
     return curtains
+
+
+@pytest.fixture(scope='function')
+def curtains():
+    return _curtains()
 
 
 def test_it_triggers_the_right_scene_event(sprite, curtains):
@@ -110,3 +114,12 @@ def test_it_can_remove_a_handler_everywhere(sprite, curtains):
     trigger()
 
     assert sprite.handler.call_count == 3
+
+
+def test_it_can_send_draw_kwargs():
+    curtains = _curtains(draw_kwargs={'filter': 'gl.GL_NEAREST'})
+    scene1 = curtains.scenes['scene1']
+    spritelist = Mock()
+    scene1._sprite_lists.append(spritelist)
+    scene1.draw()
+    spritelist.draw.assert_called_with(filter='gl.GL_NEAREST')

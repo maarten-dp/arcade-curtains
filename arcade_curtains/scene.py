@@ -18,6 +18,7 @@ class BaseScene:
     def _bind(self, window, curtains):
         self.window = window
         self.curtains = curtains
+        self.draw_kwargs = curtains.options.draw_kwargs
 
     def setup(self, *args, **kwargs):
         raise NotImplementedError()
@@ -29,11 +30,10 @@ class BaseScene:
         pass
 
     def _setup_spritelists(self):
-        for attribute in dir(self):
-            attr = getattr(self, attribute)
-            if isinstance(attr, arcade.SpriteList):
-                self._sprite_lists.append(attr)
+        for attribute, value in self.__dict__.items():
+            if isinstance(value, arcade.SpriteList):
+                self._sprite_lists.append(value)
 
     def draw(self):
         for slist in self._sprite_lists:
-            slist.draw()
+            slist.draw(**self.draw_kwargs)
