@@ -19,6 +19,8 @@ class Event(Enum):
     FRAME = 7
     BEFORE_DRAW = 8
     AFTER_DRAW = 9
+    KEY_DOWN = 10
+    KEY_UP = 11
 
 
 EMPTY_SPRITE = Mock()
@@ -93,7 +95,10 @@ class EventHandler(object):
         run_handlers(self.handlers[Event.AFTER_DRAW])
 
     def trigger_key_press(self, key):
-        run_handlers(self.handlers.get(key, []))
+        run_handlers(self.handlers.get((Event.KEY_DOWN, key), []))
+
+    def trigger_key_release(self, key):
+        run_handlers(self.handlers.get((Event.KEY_UP, key), []))
 
     def get_sprite_at(self, *coords):
         sprites = arcade.SpriteList()
@@ -140,6 +145,14 @@ class EventHandler(object):
         if sprite in self.all_sprites:
             self.all_sprites.remove(sprite)
 
+    def _key(self, event_type, key, handler_function, kwargs={}):
+        event_type = (event_type, key)
+        self.add_event(event_type, handler_function, kwargs)
+
+    def _remove_key(self, event_type, key, handler):
+        event_type = (event_type, key)
+        self.remove_event(event_type, handler)
+
     click = partialmethod(add_sprite_event, SpriteEvent.CLICK)
     hover = partialmethod(add_sprite_event, SpriteEvent.HOVER)
     out = partialmethod(add_sprite_event, SpriteEvent.OUT)
@@ -160,5 +173,8 @@ class EventHandler(object):
     remove_before_draw = partialmethod(remove_event, Event.BEFORE_DRAW)
     remove_after_draw = partialmethod(remove_event, Event.AFTER_DRAW)
 
-    key = add_event
-    remove_key = remove_event
+    key_down = partialmethod(_key, Event.KEY_DOWN)
+    key_up = partialmethod(_key, Event.KEY_UP)
+
+    remove_key_down = partialmethod(_remove_key, Event.KEY_DOWN)
+    remove_key_up = partialmethod(_remove_key, Event.KEY_UP)

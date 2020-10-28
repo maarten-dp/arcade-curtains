@@ -43,8 +43,15 @@ def test_it_can_fire_events(sprite, event, triggers):
     sprite.handler.assert_called_once()
 
 
-def test_it_can_fire_keyboard_events(sprite):
+def test_it_can_fire_keyboard_up_events(sprite):
     ev = EventHandler()
-    ev.key(ESCAPE, sprite.handler)
+    ev.key_up(ESCAPE, sprite.handler)
+    ev.trigger_key_release(ESCAPE)
+    sprite.handler.assert_called_once()
+
+
+def test_it_can_fire_keyboard_down_events(sprite):
+    ev = EventHandler()
+    ev.key_down(ESCAPE, sprite.handler)
     ev.trigger_key_press(ESCAPE)
     sprite.handler.assert_called_once()

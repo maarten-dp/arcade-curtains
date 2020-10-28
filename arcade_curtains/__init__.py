@@ -66,7 +66,8 @@ class Curtains:
             'on_mouse_press': self.on_mouse_press,
             'on_mouse_release': self.on_mouse_release,
             'on_mouse_drag': self.on_mouse_drag,
-            'on_key_press': self.on_key_press
+            'on_key_press': self.on_key_press,
+            'on_key_release': self.on_key_release,
         }
         for member, fn in members.items():
             window_fn = getattr(window, member)
@@ -101,3 +102,7 @@ class Curtains:
     def on_key_press(self, key, modifiers):
         if not modifiers:
             self.current_scene.events.trigger_key_press(key)
+
+    def on_key_release(self, key, modifiers):
+        if not modifiers:
+            self.current_scene.events.trigger_key_release(key)
