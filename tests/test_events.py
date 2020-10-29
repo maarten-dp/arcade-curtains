@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from arcade.key import ESCAPE
 
-from arcade_curtains.event import EventHandler
+from arcade_curtains.event import EventHandler, EventGroup
 
 
 @pytest.mark.parametrize("event,triggers", [
@@ -53,5 +53,19 @@ def test_it_can_fire_keyboard_up_events(sprite):
 def test_it_can_fire_keyboard_down_events(sprite):
     ev = EventHandler()
     ev.key_down(ESCAPE, sprite.handler)
+    ev.trigger_key_press(ESCAPE)
+    sprite.handler.assert_called_once()
+
+
+def test_it_can_disable_an_event_group(sprite):
+    ev = EventHandler()
+    eg = EventGroup()
+    ev.register_group(eg)
+    eg.key_down(ESCAPE, sprite.handler)
+
+    ev.trigger_key_press(ESCAPE)
+    sprite.handler.assert_called_once()
+
+    eg.disable()
     ev.trigger_key_press(ESCAPE)
     sprite.handler.assert_called_once()

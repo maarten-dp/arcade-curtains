@@ -1,6 +1,6 @@
 from collections import defaultdict
 from enum import Enum
-from functools import partialmethod
+from functools import partialmethod, partial
 from unittest.mock import Mock
 
 import arcade
@@ -32,23 +32,9 @@ def run_handlers(handlers, *args, **kwargs):
         handler(*args, **kwargs)
 
 
-class EventHandler(object):
-    def __init__(self):
-        self.sprite_handlers = defaultdict(lambda: defaultdict(list))
-        self.handlers = defaultdict(list)
-
-        self.all_sprites = []
-
-        self._previous_hover = EMPTY_SPRITE
-        self._previous_down = EMPTY_SPRITE
-
-        self.current_x = 0
-        self.current_y = 0
-
-    def update(self, x, y):
-        self.current_x = x
-        self.current_y = y
-        current_hover = self.get_sprite_at(x, y)
+class EventTriggersMixin:
+    def trigger_mouse_events(self, x, y):
+        current_hover = self._get_sprite_at(x, y)
         if current_hover is not self._previous_hover:
             self.trigger_hover_out(self._previous_hover, x, y)
             self.trigger_hover(current_hover, x, y)
@@ -63,13 +49,13 @@ class EventHandler(object):
         run_handlers(handlers, sprite, x, y)
 
     def trigger_down(self, x, y):
-        current_down = self.get_sprite_at(x, y)
+        current_down = self._get_sprite_at(x, y)
         handlers = self.sprite_handlers[SpriteEvent.DOWN].get(current_down, [])
         run_handlers(handlers, current_down, x, y)
         self._previous_down = current_down
 
     def trigger_up(self, x, y):
-        current_up = self.get_sprite_at(x, y)
+        current_up = self._get_sprite_at(x, y)
         handlers = self.sprite_handlers[SpriteEvent.UP].get(current_up, [])
         run_handlers(handlers, current_up, x, y)
         if current_up is self._previous_down:
@@ -100,7 +86,7 @@ class EventHandler(object):
     def trigger_key_release(self, key):
         run_handlers(self.handlers.get((Event.KEY_UP, key), []))
 
-    def get_sprite_at(self, *coords):
+    def _get_sprite_at(self, *coords):
         sprites = arcade.SpriteList()
         sprites.sprite_list = self.all_sprites
         sprites = arcade.get_sprites_at_point(coords, sprites)
@@ -108,8 +94,11 @@ class EventHandler(object):
             return max(sprites)
         return EMPTY_SPRITE
 
+
+class EventHelperMixin:
     def add_sprite_event(self, event_type, sprite, handler_function,
                          kwargs={}):
+
         self.all_sprites.append(sprite)
         self.all_sprites = list(set(self.all_sprites))
         self.sprite_handlers[event_type][sprite].append((handler_function,
@@ -178,3 +167,61 @@ class EventHandler(object):
 
     remove_key_down = partialmethod(_remove_key, Event.KEY_DOWN)
     remove_key_up = partialmethod(_remove_key, Event.KEY_UP)
+
+
+class EventGroup(EventHelperMixin, EventTriggersMixin):
+    def __init__(self):
+        self.sprite_handlers = defaultdict(lambda: defaultdict(list))
+        self.handlers = defaultdict(list)
+
+        self.all_sprites = []
+
+        self._previous_hover = EMPTY_SPRITE
+        self._previous_down = EMPTY_SPRITE
+
+        self._enabled = True
+
+    def disable(self):
+        self._enabled = False
+
+    def enable(self):
+        self._enabled = True
+
+
+class EventHandler:
+    def __init__(self):
+        self.current_x = 0
+        self.current_y = 0
+
+        self.event_group = EventGroup()
+        self.event_groups = [self.event_group]
+        self._valid_functions = dir(self.event_group)
+
+        for fn_name in dir(EventTriggersMixin):
+            if fn_name.startswith('_'):
+                continue
+            setattr(self, fn_name, partial(self._execute_trigger, fn_name))
+
+        for fn_name in dir(EventHelperMixin):
+            if fn_name.startswith('_'):
+                continue
+            setattr(self, fn_name, partial(self._execute_register, fn_name))
+
+    def update(self, x, y):
+        self.current_x = x
+        self.current_y = y
+
+        for group in self.event_groups:
+            if group._enabled:
+                group.trigger_mouse_events(x, y)
+
+    def register_group(self, group):
+        self.event_groups.append(group)
+
+    def _execute_trigger(self, fn_name, *args, **kwargs):
+        for group in self.event_groups:
+            if group._enabled:
+                getattr(group, fn_name)(*args, **kwargs)
+
+    def _execute_register(self, fn_name, *args, **kwargs):
+        getattr(self.event_group, fn_name)(*args, **kwargs)

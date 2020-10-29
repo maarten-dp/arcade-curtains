@@ -66,7 +66,7 @@ def test_it_can_kill_a_sprite(sprite, curtains):
 
     trigger()
     assert sprite.handler.call_count == 3
-    assert sprite not in scene1.events.all_sprites
+    assert sprite not in scene1.events.event_group.all_sprites
 
 
 def test_it_can_remove_a_sprite_handler(sprite, curtains):
