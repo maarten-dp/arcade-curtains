@@ -217,8 +217,8 @@ class AnchorPoint:
 
 
 class Widget(PositionHelperMixin):
-    def __init__(self, center_x=0, center_y=0, **kwargs):
-        self.sprites = []
+    def __init__(self, spritelist, center_x=0, center_y=0, **kwargs):
+        self.sprites = spritelist
         self.setup_widget(**kwargs)
         self.anchor = AnchorPoint(
             center_x=self.center_x, center_y=self.center_y)
@@ -331,10 +331,6 @@ class Widget(PositionHelperMixin):
     def height(self):
         top, bottom = self._get_y_bounds()
         return top - bottom
-
-    def register(self, spritelist):
-        for sprite in self.sprites:
-            spritelist.append(sprite)
 
 
 arcade.Sprite = Sprite

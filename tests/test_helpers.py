@@ -130,7 +130,7 @@ def test_it_can_make_a_widget():
 
             self.sprites.extend([sprite1, sprite2, sprite3, sprite4])
 
-    wdg = MyWidget()
+    wdg = MyWidget(spritelist=[])
     wdg.position = (300, 300)
     assert wdg.position == (300, 300)
     assert wdg.topleft == (200, 400)
