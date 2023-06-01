@@ -21,6 +21,7 @@ class Event(Enum):
     AFTER_DRAW = 9
     KEY_DOWN = 10
     KEY_UP = 11
+    MOUSE_MOVE = 12
 
 
 EMPTY_SPRITE = Mock()
@@ -34,11 +35,15 @@ def run_handlers(handlers, *args, **kwargs):
 
 class EventTriggersMixin:
     def trigger_mouse_events(self, x, y):
+        self.trigger_mouse_move(x, y)
         current_hover = self._get_sprite_at(x, y)
         if current_hover is not self._previous_hover:
             self.trigger_hover_out(self._previous_hover, x, y)
             self.trigger_hover(current_hover, x, y)
             self._previous_hover = current_hover
+
+    def trigger_mouse_move(self, x, y):
+        run_handlers(self.handlers[Event.MOUSE_MOVE], x, y)
 
     def trigger_hover_out(self, sprite, x, y):
         handlers = self.sprite_handlers[SpriteEvent.OUT].get(sprite, [])
@@ -96,13 +101,12 @@ class EventTriggersMixin:
 
 
 class EventHelperMixin:
-    def add_sprite_event(self, event_type, sprite, handler_function,
-                         kwargs={}):
-
+    def add_sprite_event(self, event_type, sprite, handler_function, kwargs={}):
         self.all_sprites.append(sprite)
         self.all_sprites = list(set(self.all_sprites))
-        self.sprite_handlers[event_type][sprite].append((handler_function,
-                                                         kwargs))
+        self.sprite_handlers[event_type][sprite].append(
+            (handler_function, kwargs)
+        )
 
     def add_event(self, event_type, handler_function, kwargs={}):
         if handler_function not in self.handlers[event_type]:
@@ -198,12 +202,12 @@ class EventHandler:
         self._valid_functions = dir(self.event_group)
 
         for fn_name in dir(EventTriggersMixin):
-            if fn_name.startswith('_'):
+            if fn_name.startswith("_"):
                 continue
             setattr(self, fn_name, partial(self._execute_trigger, fn_name))
 
         for fn_name in dir(EventHelperMixin):
-            if fn_name.startswith('_'):
+            if fn_name.startswith("_"):
                 continue
             setattr(self, fn_name, partial(self._execute_register, fn_name))
 

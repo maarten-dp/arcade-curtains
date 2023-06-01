@@ -1,9 +1,11 @@
+import operator as op
+from unittest import mock
+
 import pytest
+import arcade
+
 import arcade_curtains as c
 from arcade_curtains.helpers import TriggerAttr, Widget
-import operator as op
-import arcade
-from unittest import mock
 
 orientations = {
     'topleft': (450, 725),
@@ -105,41 +107,43 @@ def test_it_can_build_a_trigger(sprite, op):
     assert isinstance(trigger.check(10), bool)
 
 
-def test_it_can_make_a_widget():
+@mock.patch("arcade.get_window")
+def test_it_can_get_widget_bounds(get_window):
     class MyWidget(Widget):
-        def setup_widget(self):
-            sprite1 = arcade.Sprite()
-            sprite1.position = (100, 100)
-            sprite1.width = 100
-            sprite1.height = 100
+        def setup(self):
+            pass
 
-            sprite2 = arcade.Sprite()
-            sprite2.position = (200, 100)
-            sprite2.width = 100
-            sprite2.height = 100
+    get_window.return_value = mock.Mock(width=1000, height=800)
+    wdg = MyWidget(x=200, y=300, width=100, height=150)
 
-            sprite3 = arcade.Sprite()
-            sprite3.position = (200, 200)
-            sprite3.width = 100
-            sprite3.height = 100
+    assert wdg.position == (200, 300)
+    assert wdg.topleft == (150, 425)
+    assert wdg.topright == (750, 425)
+    assert wdg.bottomleft == (150, 225)
+    assert wdg.bottomright == (750, 225)
+    assert wdg.bottom == 225
+    assert wdg.top == 425
+    assert wdg.left == 150
+    assert wdg.right == 750
 
-            sprite4 = arcade.Sprite()
-            sprite4.position = (100, 200)
-            sprite4.width = 100
-            sprite4.height = 100
 
-            self.sprites.extend([sprite1, sprite2, sprite3, sprite4])
+@mock.patch("arcade.get_window")
+def test_it_can_set_widget_bounds(get_window):
+    class MyWidget(Widget):
+        def setup(self):
+            pass
 
-    wdg = MyWidget(spritelist=[])
-    wdg.position = (300, 300)
-    assert wdg.position == (300, 300)
-    assert wdg.topleft == (200, 400)
-    assert wdg.topright == (400, 400)
-    assert wdg.bottomleft == (200, 200)
-    assert wdg.bottomright == (400, 200)
-    assert wdg.bottom == 200
-    assert wdg.top == 400
-    assert wdg.left == 200
-    assert wdg.right == 400
-    assert wdg.width == 200
-    assert wdg.height == 200
+    get_window.return_value = mock.Mock(width=1000, height=800)
+    wdg = MyWidget(x=200, y=300, width=100, height=150)
+
+    wdg.left = 100
+    assert wdg.right == 800
+
+    wdg.right = 100
+    assert wdg.left == 800
+
+    wdg.top = 100
+    assert wdg.bottom == 550
+
+    wdg.bottom = 100
+    assert wdg.top == 550

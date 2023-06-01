@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/maarten-dp/arcade-curtains.svg?branch=master)](https://travis-ci.com/maarten-dp/arcade-curtains)
+[![Build Status](https://travis-ci.com/maarten-dp/mimics.svg?branch=master)](https://travis-ci.com/maarten-dp/mimics)
 [![Codecov](https://codecov.io/gh/maarten-dp/arcade-curtains/branch/master/graph/badge.svg)](https://codecov.io/gh/maarten-dp/arcade-curtains)
 [![PyPI version](https://badge.fury.io/py/arcade-curtains.svg)](https://pypi.org/project/arcade-curtains/)
 

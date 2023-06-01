@@ -6,7 +6,12 @@ from pyglet import clock
 from .scene import BaseScene  # noqa
 from .animation import Sequence, KeyFrame, Chain  # noqa
 from .helpers import (  # noqa
-    PositionHelperMixin, Sprite, ObservableSprite, AnchorPoint, Widget)
+    PositionHelperMixin,
+    Sprite,
+    ObservableSprite,
+    AnchorPoint,
+    Widget,
+)
 
 
 def bind(fn, window_fn):
@@ -21,7 +26,7 @@ def bind(fn, window_fn):
 
 class Options:
     def __init__(self, kwargs):
-        self.draw_kwargs = kwargs.get('draw_kwargs', {})
+        self.draw_kwargs = kwargs.get("draw_kwargs", {})
 
 
 class Curtains:
@@ -60,14 +65,14 @@ class Curtains:
 
         clock.unschedule(window.update)
         members = {
-            'update': self.update,
-            'on_draw': self.on_draw,
-            'on_mouse_motion': self.on_mouse_motion,
-            'on_mouse_press': self.on_mouse_press,
-            'on_mouse_release': self.on_mouse_release,
-            'on_mouse_drag': self.on_mouse_drag,
-            'on_key_press': self.on_key_press,
-            'on_key_release': self.on_key_release,
+            "update": self.update,
+            "on_draw": self.on_draw,
+            "on_mouse_motion": self.on_mouse_motion,
+            "on_mouse_press": self.on_mouse_press,
+            "on_mouse_release": self.on_mouse_release,
+            "on_mouse_drag": self.on_mouse_drag,
+            "on_key_press": self.on_key_press,
+            "on_key_release": self.on_key_release,
         }
         for member, fn in members.items():
             window_fn = getattr(window, member)
@@ -100,9 +105,7 @@ class Curtains:
         self.current_scene.events.trigger_drag(x, y, dx, dy)
 
     def on_key_press(self, key, modifiers):
-        if not modifiers:
-            self.current_scene.events.trigger_key_press(key)
+        self.current_scene.events.trigger_key_press(key)
 
     def on_key_release(self, key, modifiers):
-        if not modifiers:
-            self.current_scene.events.trigger_key_release(key)
+        self.current_scene.events.trigger_key_release(key)

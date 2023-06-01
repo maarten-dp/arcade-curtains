@@ -1,9 +1,13 @@
+from contextvars import ContextVar
 from collections import defaultdict
 from functools import partial, wraps
 
 import arcade
 
 from .animation import AnimationManagerProxy
+
+
+CURRENT_WIDGET = ContextVar("widget", default=None)
 
 
 def delay_set_attribute(sprite, flag, value):
@@ -23,6 +27,9 @@ def modified_init(orig_init):
     def init(self, *args, **kwargs):
         orig_init(self, *args, **kwargs)
         self.animate = AnimationManagerProxy(self)
+        current_widget = CURRENT_WIDGET.get(None)
+        if current_widget:
+            current_widget.spritelist.append(self)
 
     return init
 
@@ -73,12 +80,19 @@ class PositionHelperMixin:
 class CurtainsMeta(type):
     def __init__(self, name, bases, dct):
         super().__init__(name, bases, dct)
-        self.__init__ = modified_init(self.__init__)
-        self.kill = modified_kill(self.kill)
+        if name == "Sprite":
+            self.__init__ = modified_init(self.__init__)
+            self.kill = modified_kill(self.kill)
 
 
 class Sprite(arcade.Sprite, PositionHelperMixin, metaclass=CurtainsMeta):
-    pass
+    layer = 0
+
+    def __lt__(self, other):
+        return self.layer < other.layer
+
+    def __le__(self, other):
+        return self.layer <= other.layer
 
 
 class TriggerAttr:
@@ -86,22 +100,22 @@ class TriggerAttr:
         self.attribute = attribute
 
     def __eq__(self, other):
-        return Trigger(self.attribute, '==', other)
+        return Trigger(self.attribute, "==", other)
 
     def __ne__(self, other):
-        return Trigger(self.attribute, '!=', other)
+        return Trigger(self.attribute, "!=", other)
 
     def __gt__(self, other):
-        return Trigger(self.attribute, '>', other)
+        return Trigger(self.attribute, ">", other)
 
     def __ge__(self, other):
-        return Trigger(self.attribute, '>=', other)
+        return Trigger(self.attribute, ">=", other)
 
     def __lt__(self, other):
-        return Trigger(self.attribute, '<', other)
+        return Trigger(self.attribute, "<", other)
 
     def __le__(self, other):
-        return Trigger(self.attribute, '<=', other)
+        return Trigger(self.attribute, "<=", other)
 
 
 class Trigger:
@@ -117,13 +131,13 @@ class Trigger:
         self.value = value
 
     def bake(self, obj):
-        expression = "lambda s, x: s.{} {} {}".format(self.attribute, self.op,
-                                                      self.value)
+        expression = "lambda s, x: s.{} {} {}".format(
+            self.attribute, self.op, self.value
+        )
         self.check = partial(eval(expression), obj)
 
     def check(self, other):
-        raise NotImplementedError(
-            "Trigger is not yet baked. Call bake() first")
+        raise NotImplementedError("Trigger is not yet baked. Call bake() first")
 
 
 class ObservableSprite(Sprite):
@@ -133,8 +147,8 @@ class ObservableSprite(Sprite):
 
     def __init__(self, *args, **kwargs):
         super().__setattr__(
-            '_observe',
-            defaultdict(lambda: [list(), list(), dict()]))
+            "_observe", defaultdict(lambda: [list(), list(), dict()])
+        )
         super().__init__(*args, **kwargs)
 
     def __setattr__(self, key, value):
@@ -217,44 +231,36 @@ class AnchorPoint:
 
 
 class Widget(PositionHelperMixin):
-    def __init__(self, spritelist, center_x=0, center_y=0, **kwargs):
-        self.sprites = spritelist
-        self.setup_widget(**kwargs)
-        self.anchor = AnchorPoint(
-            center_x=self.center_x, center_y=self.center_y)
-        for sprite in self.sprites:
-            self.anchor.dock(sprite)
-        self.anchor.position = (center_x, center_y)
-        self.post_setup()
+    def __init__(self, x, y, width, height, *args, **kwargs):
+        self.spritelist = arcade.SpriteList()
+        self.anchor = AnchorPoint(center_x=0, center_y=0)
+        self.showing = True
+        self.parent_widget = CURRENT_WIDGET.get(None)
+        self.width = width
+        self.height = height
 
-    def setup_widget(self):
+        token = CURRENT_WIDGET.set(self)
+        self.setup(*args, **kwargs)
+        CURRENT_WIDGET.reset(token)
+
+        if self.parent_widget:
+            self.parent_widget.anchor.dock(self.anchor)
+        for sprite in self.spritelist:
+            self.anchor.dock(sprite)
+        self.position = (x, y)
+
+    def setup(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def post_setup(self):
-        pass
+    def show(self):
+        self.showing = True
 
-    def _get_widget_bounds(self):
-        return self._get_x_bounds, self._get_y_bounds
+    def hide(self):
+        self.showing = False
 
-    def _get_y_bounds(self):
-        if not self.sprites:
-            return (0, 0)
-        top = self.sprites[0].top
-        bottom = self.sprites[0].bottom
-        for sprite in self.sprites[1:]:
-            top = max(top, sprite.top)
-            bottom = min(bottom, sprite.bottom)
-        return top, bottom
-
-    def _get_x_bounds(self):
-        if not self.sprites:
-            return (0, 0)
-        left = self.sprites[0].left
-        right = self.sprites[0].right
-        for sprite in self.sprites[1:]:
-            left = min(left, sprite.left)
-            right = max(right, sprite.right)
-        return left, right
+    def draw(self):
+        if self.showing:
+            self.spritelist.draw()
 
     @property
     def position(self):
@@ -266,8 +272,7 @@ class Widget(PositionHelperMixin):
 
     @property
     def center_x(self):
-        left, right = self._get_x_bounds()
-        return ((right - left) / 2) + left
+        return self.anchor.center_x
 
     @center_x.setter
     def center_x(self, value):
@@ -275,8 +280,7 @@ class Widget(PositionHelperMixin):
 
     @property
     def center_y(self):
-        top, bottom = self._get_y_bounds()
-        return ((top - bottom) / 2) + bottom
+        return self.anchor.center_y
 
     @center_y.setter
     def center_y(self, value):
@@ -284,53 +288,158 @@ class Widget(PositionHelperMixin):
 
     @property
     def left(self):
-        left, right = self._get_x_bounds()
-        return left
+        return int(self.anchor.center_x - (self.width / 2))
 
     @left.setter
     def left(self, value):
-        offset = value - self.left
-        self.anchor.center_x += offset
+        offset = value + (self.width / 2)
+        self.anchor.center_x = offset
 
     @property
     def right(self):
-        left, right = self._get_x_bounds()
-        return right
+        x = self.anchor.center_x + (self.width / 2)
+        return int(arcade.get_window().width - x)
 
     @right.setter
     def right(self, value):
-        offset = value - self.right
-        self.anchor.center_x += offset
+        offset = arcade.get_window().width - value
+        self.anchor.center_x = offset - (self.width / 2)
 
     @property
     def top(self):
-        top, bottom = self._get_y_bounds()
-        return top
+        y = self.anchor.center_y + (self.height / 2)
+        return int(arcade.get_window().height - y)
 
     @top.setter
     def top(self, value):
-        offset = value - self.top
-        self.anchor.center_y += offset
+        offset = arcade.get_window().height - value
+        self.anchor.center_y = offset - (self.height / 2)
 
     @property
     def bottom(self):
-        top, bottom = self._get_y_bounds()
-        return bottom
+        return int(self.anchor.center_y - (self.height / 2))
 
     @bottom.setter
     def bottom(self, value):
-        offset = value - self.bottom
-        self.anchor.center_y += offset
+        offset = value + (self.height / 2)
+        self.anchor.center_y = offset
 
-    @property
-    def width(self):
-        left, right = self._get_x_bounds()
-        return right - left
 
-    @property
-    def height(self):
-        top, bottom = self._get_y_bounds()
-        return top - bottom
+# class Widget(PositionHelperMixin):
+#     def __init__(self, spritelist, center_x=0, center_y=0, **kwargs):
+#         self.sprites = spritelist
+#         self.setup_widget(**kwargs)
+#         self.anchor = AnchorPoint(
+#             center_x=self.center_x, center_y=self.center_y)
+#         for sprite in self.sprites:
+#             self.anchor.dock(sprite)
+#         self.anchor.position = (center_x, center_y)
+#         self.post_setup()
+
+#     def setup_widget(self):
+#         raise NotImplementedError()
+
+#     def post_setup(self):
+#         pass
+
+#     def _get_widget_bounds(self):
+#         return self._get_x_bounds, self._get_y_bounds
+
+#     def _get_y_bounds(self):
+#         if not self.sprites:
+#             return (0, 0)
+#         top = self.sprites[0].top
+#         bottom = self.sprites[0].bottom
+#         for sprite in self.sprites[1:]:
+#             top = max(top, sprite.top)
+#             bottom = min(bottom, sprite.bottom)
+#         return top, bottom
+
+#     def _get_x_bounds(self):
+#         if not self.sprites:
+#             return (0, 0)
+#         left = self.sprites[0].left
+#         right = self.sprites[0].right
+#         for sprite in self.sprites[1:]:
+#             left = min(left, sprite.left)
+#             right = max(right, sprite.right)
+#         return left, right
+
+#     @property
+#     def position(self):
+#         return self.center_x, self.center_y
+
+#     @position.setter
+#     def position(self, value):
+#         self.center_x, self.center_y = value
+
+#     @property
+#     def center_x(self):
+#         left, right = self._get_x_bounds()
+#         return ((right - left) / 2) + left
+
+#     @center_x.setter
+#     def center_x(self, value):
+#         self.anchor.center_x = value
+
+#     @property
+#     def center_y(self):
+#         top, bottom = self._get_y_bounds()
+#         return ((top - bottom) / 2) + bottom
+
+#     @center_y.setter
+#     def center_y(self, value):
+#         self.anchor.center_y = value
+
+#     @property
+#     def left(self):
+#         left, right = self._get_x_bounds()
+#         return left
+
+#     @left.setter
+#     def left(self, value):
+#         offset = value - self.left
+#         self.anchor.center_x += offset
+
+#     @property
+#     def right(self):
+#         left, right = self._get_x_bounds()
+#         return right
+
+#     @right.setter
+#     def right(self, value):
+#         offset = value - self.right
+#         self.anchor.center_x += offset
+
+#     @property
+#     def top(self):
+#         top, bottom = self._get_y_bounds()
+#         return top
+
+#     @top.setter
+#     def top(self, value):
+#         offset = value - self.top
+#         self.anchor.center_y += offset
+
+#     @property
+#     def bottom(self):
+#         top, bottom = self._get_y_bounds()
+#         return bottom
+
+#     @bottom.setter
+#     def bottom(self, value):
+#         offset = value - self.bottom
+#         self.anchor.center_y += offset
+
+#     @property
+#     def width(self):
+#         left, right = self._get_x_bounds()
+#         return right - left
+
+#     @property
+#     def height(self):
+#         top, bottom = self._get_y_bounds()
+#         return top - bottom
 
 
 arcade.Sprite = Sprite
