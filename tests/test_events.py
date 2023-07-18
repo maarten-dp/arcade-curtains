@@ -25,7 +25,7 @@ def test_it_can_fire_sprite_events(sprite, event, triggers):
 def test_it_can_fire_callbacks_with_args(sprite):
     ev = EventHandler()
     kwargs = {'default': True, 'attribute': 'health'}
-    ev.down(sprite, sprite.handler, kwargs)
+    ev.down(sprite, sprite.handler, kwargs=kwargs)
     ev.trigger_down(50, 50)
     sprite.handler.assert_called_with(sprite, 50, 50, **kwargs)
 
@@ -50,11 +50,25 @@ def test_it_can_fire_keyboard_up_events(sprite):
     sprite.handler.assert_called_once()
 
 
+def test_it_can_fire_keyboard_up_events_with_argument(sprite):
+    ev = EventHandler()
+    ev.key_up(ESCAPE, sprite.handler, args=("my_argument", ))
+    ev.trigger_key_release(ESCAPE)
+    sprite.handler.assert_called_once_with("my_argument")
+
+
 def test_it_can_fire_keyboard_down_events(sprite):
     ev = EventHandler()
     ev.key_down(ESCAPE, sprite.handler)
     ev.trigger_key_press(ESCAPE)
     sprite.handler.assert_called_once()
+
+
+def test_it_can_fire_keyboard_down_events_with_argument(sprite):
+    ev = EventHandler()
+    ev.key_down(ESCAPE, sprite.handler, args=("my_argument", ))
+    ev.trigger_key_press(ESCAPE)
+    sprite.handler.assert_called_once_with("my_argument")
 
 
 def test_it_can_disable_an_event_group(sprite):

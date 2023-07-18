@@ -28,7 +28,8 @@ EMPTY_SPRITE = Mock()
 
 
 def run_handlers(handlers, *args, **kwargs):
-    for handler, handler_kwargs in handlers:
+    for handler, handler_args, handler_kwargs in handlers:
+        args = (*args, *handler_args)
         kwargs.update(handler_kwargs)
         handler(*args, **kwargs)
 
@@ -101,16 +102,30 @@ class EventTriggersMixin:
 
 
 class EventHelperMixin:
-    def add_sprite_event(self, event_type, sprite, handler_function, kwargs={}):
+    def add_sprite_event(self,
+                         event_type,
+                         sprite,
+                         handler_function,
+                         args=None,
+                         kwargs=None):
+        if not args:
+            args = tuple()
+        if not kwargs:
+            kwargs = dict()
+
         self.all_sprites.append(sprite)
         self.all_sprites = list(set(self.all_sprites))
-        self.sprite_handlers[event_type][sprite].append(
-            (handler_function, kwargs)
-        )
+        self.sprite_handlers[event_type][sprite].append((handler_function,
+                                                         args, kwargs))
 
-    def add_event(self, event_type, handler_function, kwargs={}):
+    def add_event(self, event_type, handler_function, args=None, kwargs=None):
+        if not args:
+            args = tuple()
+        if not kwargs:
+            kwargs = dict()
+
         if handler_function not in self.handlers[event_type]:
-            self.handlers[event_type].append((handler_function, kwargs))
+            self.handlers[event_type].append((handler_function, args, kwargs))
 
     def remove_sprite_event(self, event_type, sprite, handler):
         if self.sprite_handlers[event_type].get(sprite, None):
@@ -138,9 +153,14 @@ class EventHelperMixin:
         if sprite in self.all_sprites:
             self.all_sprites.remove(sprite)
 
-    def _key(self, event_type, key, handler_function, kwargs={}):
+    def _key(self, event_type, key, handler_function, args=None, kwargs=None):
+        if not args:
+            args = tuple()
+        if not kwargs:
+            kwargs = dict()
+
         event_type = (event_type, key)
-        self.add_event(event_type, handler_function, kwargs)
+        self.add_event(event_type, handler_function, args, kwargs)
 
     def _remove_key(self, event_type, key, handler):
         event_type = (event_type, key)

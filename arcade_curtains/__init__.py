@@ -6,11 +6,7 @@ from pyglet import clock
 from .scene import BaseScene  # noqa
 from .animation import Sequence, KeyFrame, Chain  # noqa
 from .helpers import (  # noqa
-    PositionHelperMixin,
-    Sprite,
-    ObservableSprite,
-    AnchorPoint,
-    Widget,
+    PositionHelperMixin, Sprite, ObservableSprite, AnchorPoint, Widget,
 )
 
 

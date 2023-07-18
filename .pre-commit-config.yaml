@@ -7,7 +7,7 @@ exclude: >
 repos:
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    sha: "v0.7.1"
+    sha: "v4.4.0"
     hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
@@ -19,7 +19,7 @@ repos:
     - id: name-tests-test
       args: ['--django']
 
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/pycqa/flake8
     rev: "3.7.7"
     hooks:
     - id: flake8
@@ -36,4 +36,4 @@ repos:
     - id: yapf
       args: [-i, -r]
       language: python
-      language_version: python3.6
+      language_version: python3.10
