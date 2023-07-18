@@ -24,10 +24,10 @@ def test_it_can_fire_sprite_events(sprite, event, triggers):
 
 def test_it_can_fire_callbacks_with_args(sprite):
     ev = EventHandler()
-    kwargs = {'default': True, 'attribute': 'health'}
-    ev.down(sprite, sprite.handler, kwargs=kwargs)
+    ev.down(sprite, sprite.handler, default=True, attribute='health')
     ev.trigger_down(50, 50)
-    sprite.handler.assert_called_with(sprite, 50, 50, **kwargs)
+    sprite.handler.assert_called_with(
+        sprite, 50, 50, default=True, attribute='health')
 
 
 @pytest.mark.parametrize("event,triggers", [
@@ -52,7 +52,7 @@ def test_it_can_fire_keyboard_up_events(sprite):
 
 def test_it_can_fire_keyboard_up_events_with_argument(sprite):
     ev = EventHandler()
-    ev.key_up(ESCAPE, sprite.handler, args=("my_argument", ))
+    ev.key_up(ESCAPE, sprite.handler, "my_argument")
     ev.trigger_key_release(ESCAPE)
     sprite.handler.assert_called_once_with("my_argument")
 
@@ -66,7 +66,7 @@ def test_it_can_fire_keyboard_down_events(sprite):
 
 def test_it_can_fire_keyboard_down_events_with_argument(sprite):
     ev = EventHandler()
-    ev.key_down(ESCAPE, sprite.handler, args=("my_argument", ))
+    ev.key_down(ESCAPE, sprite.handler, "my_argument")
     ev.trigger_key_press(ESCAPE)
     sprite.handler.assert_called_once_with("my_argument")
 

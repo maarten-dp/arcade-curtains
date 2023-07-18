@@ -102,28 +102,14 @@ class EventTriggersMixin:
 
 
 class EventHelperMixin:
-    def add_sprite_event(self,
-                         event_type,
-                         sprite,
-                         handler_function,
-                         args=None,
-                         kwargs=None):
-        if not args:
-            args = tuple()
-        if not kwargs:
-            kwargs = dict()
-
+    def add_sprite_event(self, event_type, sprite, handler_function, *args,
+                         **kwargs):
         self.all_sprites.append(sprite)
         self.all_sprites = list(set(self.all_sprites))
         self.sprite_handlers[event_type][sprite].append((handler_function,
                                                          args, kwargs))
 
-    def add_event(self, event_type, handler_function, args=None, kwargs=None):
-        if not args:
-            args = tuple()
-        if not kwargs:
-            kwargs = dict()
-
+    def add_event(self, event_type, handler_function, *args, **kwargs):
         if handler_function not in self.handlers[event_type]:
             self.handlers[event_type].append((handler_function, args, kwargs))
 
@@ -153,14 +139,9 @@ class EventHelperMixin:
         if sprite in self.all_sprites:
             self.all_sprites.remove(sprite)
 
-    def _key(self, event_type, key, handler_function, args=None, kwargs=None):
-        if not args:
-            args = tuple()
-        if not kwargs:
-            kwargs = dict()
-
+    def _key(self, event_type, key, handler_function, *args, **kwargs):
         event_type = (event_type, key)
-        self.add_event(event_type, handler_function, args, kwargs)
+        self.add_event(event_type, handler_function, *args, **kwargs)
 
     def _remove_key(self, event_type, key, handler):
         event_type = (event_type, key)
