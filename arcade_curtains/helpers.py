@@ -6,7 +6,6 @@ import arcade
 
 from .animation import AnimationManagerProxy
 
-
 CURRENT_WIDGET = ContextVar("widget", default=None)
 
 
@@ -131,13 +130,13 @@ class Trigger:
         self.value = value
 
     def bake(self, obj):
-        expression = "lambda s, x: s.{} {} {}".format(
-            self.attribute, self.op, self.value
-        )
+        expression = "lambda s, x: s.{} {} {}".format(self.attribute, self.op,
+                                                      self.value)
         self.check = partial(eval(expression), obj)
 
     def check(self, other):
-        raise NotImplementedError("Trigger is not yet baked. Call bake() first")
+        raise NotImplementedError(
+            "Trigger is not yet baked. Call bake() first")
 
 
 class ObservableSprite(Sprite):
@@ -147,8 +146,8 @@ class ObservableSprite(Sprite):
 
     def __init__(self, *args, **kwargs):
         super().__setattr__(
-            "_observe", defaultdict(lambda: [list(), list(), dict()])
-        )
+            "_observe",
+            defaultdict(lambda: [list(), list(), dict()]))
         super().__init__(*args, **kwargs)
 
     def __setattr__(self, key, value):
@@ -440,7 +439,6 @@ class Widget(PositionHelperMixin):
 #     def height(self):
 #         top, bottom = self._get_y_bounds()
 #         return top - bottom
-
 
 arcade.Sprite = Sprite
 arcade.sprite.Sprite = Sprite
